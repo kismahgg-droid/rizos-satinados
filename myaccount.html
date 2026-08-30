@@ -39,28 +39,44 @@
       <div class="section-head account-head">
         <p class="eyebrow">Mi cuenta</p>
         <h1 id="greeting">Hola</h1>
-        <button type="button" class="btn btn-outline" id="logoutBtn">Cerrar sesión</button>
       </div>
 
-      <div class="account-grid">
-        <div class="account-block">
-          <h2>Mis pedidos</h2>
-          <div id="ordersList" class="account-list">
-            <p class="account-empty">Todavía no hiciste ningún pedido.</p>
-          </div>
-        </div>
+      <div class="account-layout">
+        <nav class="account-nav" id="accountNav">
+          <button type="button" class="account-nav-item is-active" data-tab="pedidos">Pedidos</button>
+          <button type="button" class="account-nav-item" data-tab="favoritos">Favoritos</button>
+          <button type="button" class="account-nav-item" data-tab="pagos">Pagos</button>
+          <button type="button" class="account-nav-item" data-tab="avisos">Avisos</button>
+          <button type="button" class="account-nav-item account-nav-logout" id="logoutBtn">Cerrar sesión</button>
+        </nav>
 
-        <div class="account-block">
-          <h2>Mis favoritos</h2>
-          <div id="favoritesList" class="account-list account-list-grid">
-            <p class="account-empty">Todavía no marcaste favoritos.</p>
+        <div class="account-panels">
+          <div class="account-panel is-active" data-panel="pedidos">
+            <h2>Mis pedidos</h2>
+            <div id="ordersList" class="account-list">
+              <p class="account-empty">Todavía no hiciste ningún pedido.</p>
+            </div>
           </div>
-        </div>
 
-        <div class="account-block">
-          <h2>Avisos de stock</h2>
-          <div id="alertsList" class="account-list">
-            <p class="account-empty">No tenés avisos de stock pendientes.</p>
+          <div class="account-panel" data-panel="favoritos">
+            <h2>Mis favoritos</h2>
+            <div id="favoritesList" class="account-list account-list-grid">
+              <p class="account-empty">Todavía no marcaste favoritos.</p>
+            </div>
+          </div>
+
+          <div class="account-panel" data-panel="pagos">
+            <h2>Pagos</h2>
+            <div id="paymentsList" class="account-list">
+              <p class="account-empty">Todavía no hay pagos para mostrar.</p>
+            </div>
+          </div>
+
+          <div class="account-panel" data-panel="avisos">
+            <h2>Avisos de stock</h2>
+            <div id="alertsList" class="account-list">
+              <p class="account-empty">No tenés avisos de stock pendientes.</p>
+            </div>
           </div>
         </div>
       </div>

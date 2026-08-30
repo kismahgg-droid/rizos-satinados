@@ -169,17 +169,22 @@ export async function renderAuthHeader() {
   const links = [document.getElementById("authLink"), document.getElementById("authLinkMobile")].filter(Boolean);
   if (!links.length) return;
   const session = await getSession();
+  const onAccountPage = /\/?myaccount\.html$/.test(window.location.pathname);
+
   if (!session) {
     links.forEach((link) => {
       link.textContent = "Iniciar sesión";
       link.href = "account.html";
+      link.onclick = null;
     });
     return;
   }
-  const profile = await getProfile(session.user.id);
-  const label = profile?.full_name ? `Hola, ${profile.full_name.split(" ")[0]}` : "Mi cuenta";
+
   links.forEach((link) => {
-    link.textContent = label;
+    link.textContent = "Mi cuenta";
     link.href = "myaccount.html";
+    // Si ya estás en "Mi cuenta", tocar el botón de nuevo no hace nada
+    // (evita una recarga innecesaria de la página).
+    link.onclick = onAccountPage ? (e) => e.preventDefault() : null;
   });
 }

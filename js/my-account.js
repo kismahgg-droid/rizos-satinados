@@ -70,8 +70,43 @@ function renderAlerts(alerts) {
     .join("");
 }
 
+const PAYMENT_LABELS = { efectivo: "Efectivo", transferencia: "Transferencia" };
+
+function renderPayments(orders) {
+  const el = document.getElementById("paymentsList");
+  if (!orders.length) return;
+  el.innerHTML = orders
+    .map(
+      (o) => `
+      <div class="order-row">
+        <div class="order-row-main">
+          <span class="order-status status-${o.status}">${STATUS_LABELS[o.status] || o.status}</span>
+          <span class="order-date">${formatDate(o.created_at)}</span>
+        </div>
+        <p class="order-items">${o.payment_method ? PAYMENT_LABELS[o.payment_method] || o.payment_method : "Medio de pago a coordinar"}</p>
+        <p class="order-total">${money(o.total)}</p>
+      </div>`
+    )
+    .join("");
+}
+
+function wireTabs() {
+  const nav = document.getElementById("accountNav");
+  if (!nav) return;
+  nav.querySelectorAll(".account-nav-item[data-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      nav.querySelectorAll(".account-nav-item[data-tab]").forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      document.querySelectorAll(".account-panel").forEach((panel) => {
+        panel.classList.toggle("is-active", panel.dataset.panel === btn.dataset.tab);
+      });
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   renderAuthHeader();
+  wireTabs();
 
   const session = await getSession();
   if (!session) {
@@ -91,6 +126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   ]);
   renderOrders(orders);
   renderFavorites(favorites);
+  renderPayments(orders);
   renderAlerts(alerts);
 
   document.getElementById("logoutBtn").addEventListener("click", async () => {
