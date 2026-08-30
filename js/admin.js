@@ -7,6 +7,7 @@ import {
   adminListOrders,
   adminUpdateOrderStatus,
   money,
+  renderAuthHeader,
 } from "./supabase-client.js";
 
 const STATUSES = ["pendiente", "confirmado", "entregado", "cancelado"];
@@ -213,6 +214,7 @@ async function refreshAll() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  renderAuthHeader();
   wireTabs();
 
   const session = await getSession();

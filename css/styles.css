@@ -222,6 +222,8 @@ button { font: inherit; color: inherit; background: none; border: none; }
 }
 .main-nav a:hover::after { transform: scaleX(1); }
 
+.nav-account-link { display: none; }
+
 .nav-toggle {
   display: none;
   flex-direction: column;
@@ -1053,8 +1055,14 @@ section { padding: 88px 0; }
   }
   .main-nav.open { max-height: 520px; }
   .main-nav a { padding: 14px 0; width: 100%; text-align: center; }
+  .nav-account-link {
+    display: block;
+    color: var(--plum);
+    font-weight: 600;
+  }
   .nav-toggle { display: flex; }
   .header-inner { gap: 10px; }
+  .header-actions { display: none; }
   .product-grid, .scrunchie-grid { grid-template-columns: repeat(2, 1fr); }
   .benefits-grid { grid-template-columns: 1fr; }
   .payment-grid { grid-template-columns: 1fr; }
