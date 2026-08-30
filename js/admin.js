@@ -62,18 +62,48 @@ function renderProductsTable(products) {
 
   tbody.querySelectorAll("tr").forEach((row) => {
     const id = row.dataset.id;
-    row.querySelector(".save-btn").addEventListener("click", async () => {
+    // Guardamos el producto original completo: el upsert manda TODOS sus
+    // campos (no solo precio/stock/activo) para evitar cualquier duda con
+    // columnas obligatorias en la base de datos.
+    const original = products.find((p) => p.id === id);
+    const saveBtn = row.querySelector(".save-btn");
+    saveBtn.addEventListener("click", async () => {
       const price = Number(row.querySelector(".price-input").value) || 0;
       const stock = Number(row.querySelector(".stock-input").value) || 0;
       const active = row.querySelector(".active-input").checked;
-      await adminUpsertProduct({ id, price, stock, active });
-      row.querySelector(".save-btn").textContent = "Guardado ✓";
-      setTimeout(() => (row.querySelector(".save-btn").textContent = "Guardar"), 1500);
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Guardando…";
+      const { error } = await adminUpsertProduct({
+        id,
+        category: original?.category,
+        name: original?.name,
+        color: original?.color ?? null,
+        price,
+        stock,
+        image_path: original?.image_path,
+        description: original?.description ?? null,
+        active,
+      });
+      saveBtn.disabled = false;
+      if (error) {
+        console.error("Error al guardar producto:", error);
+        saveBtn.textContent = "Error ⚠";
+        alert(`No se pudo guardar el producto.\n\n${error.message || error}`);
+        setTimeout(() => (saveBtn.textContent = "Guardar"), 2500);
+        return;
+      }
+      saveBtn.textContent = "Guardado ✓";
+      setTimeout(() => (saveBtn.textContent = "Guardar"), 1500);
       await refreshAll();
     });
     row.querySelector(".delete-btn").addEventListener("click", async () => {
       if (!confirm("¿Borrar este producto?")) return;
-      await adminDeleteProduct(id);
+      const { error } = await adminDeleteProduct(id);
+      if (error) {
+        console.error("Error al borrar producto:", error);
+        alert(`No se pudo borrar el producto.\n\n${error.message || error}`);
+        return;
+      }
       await refreshAll();
     });
   });
@@ -85,8 +115,20 @@ function renderOrdersTable(orders) {
 
   tbody.querySelectorAll("tr").forEach((row) => {
     const id = row.dataset.id;
-    row.querySelector(".status-select").addEventListener("change", async (e) => {
-      await adminUpdateOrderStatus(id, e.target.value);
+    const select = row.querySelector(".status-select");
+    select.dataset.previousValue = select.value;
+    select.addEventListener("change", async () => {
+      const previousValue = select.dataset.previousValue;
+      select.disabled = true;
+      const { error } = await adminUpdateOrderStatus(id, select.value);
+      select.disabled = false;
+      if (error) {
+        console.error("Error al actualizar el estado del pedido:", error);
+        alert(`No se pudo actualizar el estado del pedido.\n\n${error.message || error}`);
+        select.value = previousValue;
+        return;
+      }
+      select.dataset.previousValue = select.value;
       await refreshAll();
     });
   });
@@ -234,7 +276,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("newProductForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
-    await adminUpsertProduct({
+    const { error } = await adminUpsertProduct({
       category: fd.get("category"),
       name: fd.get("name"),
       color: fd.get("color") || null,
@@ -243,6 +285,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       image_path: fd.get("image_path"),
       active: true,
     });
+    if (error) {
+      console.error("Error al agregar producto:", error);
+      alert(`No se pudo agregar el producto.\n\n${error.message || error}`);
+      return;
+    }
     e.target.reset();
     await refreshAll();
   });

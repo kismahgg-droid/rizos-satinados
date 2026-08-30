@@ -730,7 +730,7 @@ section { padding: 88px 0; }
 .account-panel-head h2 { margin-bottom: 0; }
 .account-empty { color: var(--ink-soft); font-size: .9rem; margin: 0; }
 .account-list { display: flex; flex-direction: column; gap: 12px; }
-.account-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 14px; }
+.account-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
 .order-row { border-bottom: 1px solid var(--cream-alt); padding-bottom: 12px; }
 .order-row:last-child { border-bottom: none; padding-bottom: 0; }
 .order-row-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -750,9 +750,25 @@ section { padding: 88px 0; }
 .order-date { font-size: .8rem; color: var(--ink-soft); }
 .order-items { margin: 0 0 4px; font-size: .92rem; }
 .order-total { margin: 0; font-weight: 600; color: var(--plum-dark); }
-.mini-card { text-align: center; max-width: 130px; margin: 0 auto; }
-.mini-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 12px; margin-bottom: 6px; }
-.mini-card span { font-size: .78rem; }
+.mini-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+  max-width: 160px;
+  margin: 0 auto;
+}
+.mini-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 12px; }
+.mini-card span { font-size: .82rem; font-weight: 500; }
+.mini-card .mini-card-note { font-size: .74rem; color: var(--ink-soft); margin: -4px 0 0; }
+.mini-card .btn { width: 100%; justify-content: center; margin-top: auto; }
+
+.product-card.highlight {
+  outline: 3px solid var(--rose);
+  outline-offset: 6px;
+  border-radius: var(--radius-md);
+  transition: outline-color .3s ease;
+}
 
 .admin-block {
   background: var(--white);

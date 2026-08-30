@@ -43,7 +43,7 @@ function cardHTML(product, isFavorite) {
       </button>`;
 
   return `
-    <figure class="product-card ${outOfStock ? "out-of-stock" : ""} reveal in-view" data-product-id="${product.id}">
+    <figure class="product-card ${outOfStock ? "out-of-stock" : ""} reveal in-view" id="product-${product.id}" data-product-id="${product.id}">
       <div class="product-img">
         ${outOfStock ? '<span class="out-badge">Sin stock</span>' : ""}
         <img src="${product.image_path}" alt="${productAlt(product)}" loading="lazy">
@@ -77,6 +77,21 @@ async function renderProducts() {
   wireFavButtons(session);
   wireAlertButtons(session);
   wireCartButtons(products);
+  scrollToHashProduct();
+}
+
+// Si llegamos desde "Mi cuenta" (favoritos/avisos) con un link tipo
+// index.html#product-<id>, el navegador intenta saltar al ancla antes de
+// que las tarjetas terminen de renderizarse (llegan async de Supabase).
+// Por eso lo hacemos a mano acá, una vez que ya están en el DOM.
+function scrollToHashProduct() {
+  const hash = window.location.hash;
+  if (!hash.startsWith("#product-")) return;
+  const el = document.querySelector(hash);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.classList.add("highlight");
+  setTimeout(() => el.classList.remove("highlight"), 2200);
 }
 
 function wireFavButtons(session) {

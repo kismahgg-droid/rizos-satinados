@@ -50,6 +50,7 @@ function renderFavorites(products) {
       <div class="mini-card">
         <img src="${p.image_path}" alt="${p.name}" loading="lazy">
         <span>${p.name}</span>
+        <a class="btn btn-outline btn-small" href="index.html#product-${p.id}">Ver producto</a>
       </div>`
     )
     .join("");
@@ -62,9 +63,11 @@ function renderAlerts(alerts) {
   el.innerHTML = pending
     .map(
       (a) => `
-      <div class="order-row">
-        <p class="order-items">${a.products?.name || "Producto"}</p>
-        <p class="account-empty">Te avisamos apenas vuelva el stock.</p>
+      <div class="mini-card">
+        <img src="${a.products?.image_path}" alt="${a.products?.name || "Producto"}" loading="lazy">
+        <span>${a.products?.name || "Producto"}</span>
+        <p class="mini-card-note">Te avisamos cuando haya stock.</p>
+        <a class="btn btn-outline btn-small" href="index.html#product-${a.product_id}">Ver producto</a>
       </div>`
     )
     .join("");
