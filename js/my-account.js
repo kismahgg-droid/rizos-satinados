@@ -119,6 +119,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     ? `Hola, ${profile.full_name.split(" ")[0]}`
     : "Hola";
 
+  if (profile?.role === "admin") {
+    document.getElementById("adminNavLink").hidden = false;
+  }
+
   const [orders, favorites, alerts] = await Promise.all([
     getMyOrders(session.user.id),
     getMyFavoriteProducts(session.user.id),
@@ -130,6 +134,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderAlerts(alerts);
 
   document.getElementById("logoutBtn").addEventListener("click", async () => {
+    if (!confirm("¿Seguro que querés cerrar sesión?")) return;
     await signOut();
     window.location.href = "index.html";
   });
