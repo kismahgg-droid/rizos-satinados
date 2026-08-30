@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const session = await getSession();
   if (session) {
-    window.location.href = "mi-cuenta.html";
+    window.location.href = "myaccount.html";
     return;
   }
 
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       errorEl.hidden = false;
       return;
     }
-    window.location.href = "mi-cuenta.html";
+    window.location.href = "myaccount.html";
   });
 
   registerForm.addEventListener("submit", async (e) => {
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
     if (data.session) {
-      window.location.href = "mi-cuenta.html";
+      window.location.href = "myaccount.html";
       return;
     }
     successEl.textContent = "Cuenta creada. Revisá tu email para confirmarla y después iniciá sesión.";

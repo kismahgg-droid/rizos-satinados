@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const session = await getSession();
   if (!session) {
-    window.location.href = "cuenta.html";
+    window.location.href = "account.html";
     return;
   }
   const profile = await getProfile(session.user.id);

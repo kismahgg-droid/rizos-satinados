@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const session = await getSession();
   if (!session) {
-    window.location.href = "cuenta.html";
+    window.location.href = "account.html";
     return;
   }
 

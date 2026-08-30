@@ -85,7 +85,7 @@ function wireFavButtons(session) {
   document.querySelectorAll(".fav-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
       if (!session) {
-        window.location.href = "cuenta.html";
+        window.location.href = "account.html";
         return;
       }
       const productId = btn.dataset.productId;
@@ -101,7 +101,7 @@ function wireAlertButtons(session) {
   document.querySelectorAll(".alert-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
       if (!session) {
-        window.location.href = "cuenta.html";
+        window.location.href = "account.html";
         return;
       }
       await requestStockAlert(session.user.id, btn.dataset.productId);

@@ -31,7 +31,7 @@ export async function signOut() {
 export async function signInWithProvider(provider) {
   return supabase.auth.signInWithOAuth({
     provider,
-    options: { redirectTo: new URL("mi-cuenta.html", window.location.href).toString() },
+    options: { redirectTo: new URL("myaccount.html", window.location.href).toString() },
   });
 }
 
@@ -172,7 +172,7 @@ export async function renderAuthHeader() {
   if (!session) {
     links.forEach((link) => {
       link.textContent = "Iniciar sesión";
-      link.href = "cuenta.html";
+      link.href = "account.html";
     });
     return;
   }
@@ -180,6 +180,6 @@ export async function renderAuthHeader() {
   const label = profile?.full_name ? `Hola, ${profile.full_name.split(" ")[0]}` : "Mi cuenta";
   links.forEach((link) => {
     link.textContent = label;
-    link.href = "mi-cuenta.html";
+    link.href = "myaccount.html";
   });
 }

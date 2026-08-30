@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
-Disallow: /cuenta.html
-Disallow: /mi-cuenta.html
+Disallow: /account.html
+Disallow: /myaccount.html
 Disallow: /admin.html
 
 Sitemap: https://rizossatinados.com/sitemap.xml
