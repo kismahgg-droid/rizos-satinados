@@ -32,6 +32,22 @@ body {
   background: var(--cream);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  animation: page-fade-in .4s ease;
+}
+
+@keyframes page-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+body.page-leaving {
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
+  body.page-leaving { opacity: 1; transition: none; }
 }
 
 img { max-width: 100%; display: block; }

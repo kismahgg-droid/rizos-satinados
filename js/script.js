@@ -81,6 +81,28 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Fundido suave al navegar entre páginas del sitio (en vez de un salto seco).
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll('a[href$=".html"], a[href*=".html#"]').forEach((link) => {
+    if (link.target === "_blank" || link.hasAttribute("download")) return;
+    link.addEventListener("click", (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (link.pathname === window.location.pathname) {
+        // Ancla dentro de la misma página (ej. "Beneficios"): dejar el scroll suave nativo.
+        if (link.hash) return;
+        // Mismo link sin ancla estando ya en esa página (ej. "Mi cuenta"): no hacer nada.
+        e.preventDefault();
+        return;
+      }
+      if (prefersReducedMotion) return;
+      e.preventDefault();
+      document.body.classList.add("page-leaving");
+      setTimeout(() => {
+        window.location.href = link.href;
+      }, 180);
+    });
+  });
+
   const revealEls = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window && revealEls.length) {
     const observer = new IntersectionObserver(
