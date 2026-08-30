@@ -683,6 +683,15 @@ section { padding: 88px 0; }
 .auth-error { color: #B3261E; font-size: .88rem; margin: 0; }
 .auth-success { color: #1a7f4b; font-size: .88rem; margin: 0; }
 .auth-hint { color: var(--ink-soft); font-size: .85rem; margin: 0; }
+.auth-forgot {
+  align-self: center;
+  color: var(--plum);
+  font-size: .85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+}
+.auth-forgot:hover { color: var(--rose); text-decoration: underline; }
 
 .account-section, .admin-section { padding: 64px 0; }
 .account-head {
@@ -737,9 +746,17 @@ section { padding: 88px 0; }
 .account-panel { display: none; }
 .account-panel.is-active { display: block; }
 .account-panel h2 { font-size: 1.1rem; margin-bottom: 16px; }
+.account-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.account-panel-head h2 { margin-bottom: 0; }
 .account-empty { color: var(--ink-soft); font-size: .9rem; margin: 0; }
 .account-list { display: flex; flex-direction: column; gap: 12px; }
-.account-list-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.account-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 14px; }
 .order-row { border-bottom: 1px solid var(--cream-alt); padding-bottom: 12px; }
 .order-row:last-child { border-bottom: none; padding-bottom: 0; }
 .order-row-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -759,9 +776,9 @@ section { padding: 88px 0; }
 .order-date { font-size: .8rem; color: var(--ink-soft); }
 .order-items { margin: 0 0 4px; font-size: .92rem; }
 .order-total { margin: 0; font-weight: 600; color: var(--plum-dark); }
-.mini-card { text-align: center; }
+.mini-card { text-align: center; max-width: 130px; margin: 0 auto; }
 .mini-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 12px; margin-bottom: 6px; }
-.mini-card span { font-size: .82rem; }
+.mini-card span { font-size: .78rem; }
 
 .admin-block {
   background: var(--white);
@@ -966,7 +983,6 @@ section { padding: 88px 0; }
   .footer-inner { grid-template-columns: 1fr; text-align: center; }
   .footer-col { align-items: center; }
   .testimonials-track { grid-template-columns: 1fr; }
-  .account-list-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 480px) {

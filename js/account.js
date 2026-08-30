@@ -1,4 +1,4 @@
-import { signIn, signUp, signInWithProvider, getSession, renderAuthHeader } from "./supabase-client.js";
+import { signIn, signUp, signInWithProvider, resetPassword, getSession, renderAuthHeader } from "./supabase-client.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   renderAuthHeader();
@@ -39,6 +39,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
     window.location.href = "myaccount.html";
+  });
+
+  document.getElementById("forgotBtn").addEventListener("click", async () => {
+    const errorEl = document.getElementById("loginError");
+    const resetEl = document.getElementById("resetSuccess");
+    errorEl.hidden = true;
+    resetEl.hidden = true;
+    const email = loginForm.email.value.trim();
+    if (!email) {
+      errorEl.textContent = "Escribí tu email arriba y volvé a tocar el link.";
+      errorEl.hidden = false;
+      loginForm.email.focus();
+      return;
+    }
+    await resetPassword(email);
+    resetEl.textContent = `Te enviamos un email a ${email} para elegir una contraseña nueva.`;
+    resetEl.hidden = false;
   });
 
   registerForm.addEventListener("submit", async (e) => {

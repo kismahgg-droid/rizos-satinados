@@ -28,6 +28,12 @@ export async function signOut() {
   return supabase.auth.signOut();
 }
 
+export async function resetPassword(email) {
+  return supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: new URL("account.html", window.location.href).toString(),
+  });
+}
+
 export async function signInWithProvider(provider) {
   return supabase.auth.signInWithOAuth({
     provider,
