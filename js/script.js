@@ -34,8 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const contactMenu = document.getElementById("contactMenu");
   const contactBackdrop = document.getElementById("contactBackdrop");
   const contactMenuClose = document.getElementById("contactMenuClose");
-  const contactTriggers = document.querySelectorAll(".js-contact");
-  if (contactMenu && contactBackdrop && contactTriggers.length) {
+  if (contactMenu && contactBackdrop) {
     const waItem = document.getElementById("contactMenuWhatsapp");
     const igItem = document.getElementById("contactMenuInstagram");
     let activeTrigger = null;
@@ -56,19 +55,20 @@ document.addEventListener("DOMContentLoaded", () => {
       if (igItem) igItem.href = INSTAGRAM_DM_URL;
 
       activeTrigger = trigger;
+      trigger.setAttribute("aria-haspopup", "dialog");
       trigger.setAttribute("aria-expanded", "true");
       contactMenu.classList.add("open");
       contactBackdrop.classList.add("open");
       document.body.style.overflow = "hidden";
     };
 
-    contactTriggers.forEach((trigger) => {
-      trigger.setAttribute("aria-haspopup", "dialog");
-      if (!trigger.hasAttribute("aria-expanded")) trigger.setAttribute("aria-expanded", "false");
-      trigger.addEventListener("click", (e) => {
-        e.preventDefault();
-        openMenu(trigger);
-      });
+    // Delegación de eventos: así también funciona con las tarjetas de producto
+    // que se agregan dinámicamente después de esta carga inicial.
+    document.addEventListener("click", (e) => {
+      const trigger = e.target.closest(".js-contact");
+      if (!trigger) return;
+      e.preventDefault();
+      openMenu(trigger);
     });
 
     [waItem, igItem].forEach((item) => {

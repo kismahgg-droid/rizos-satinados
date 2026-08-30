@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi cuenta — Rizos Satinados</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%233E1B4D'/%3E%3Ctext x='50' y='68' font-family='Georgia, serif' font-size='58' font-style='italic' fill='%23FBF3EF' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="index.html" class="logo">Rizos <span>Satinados</span></a>
+    <nav class="main-nav" id="main-nav">
+      <a href="index.html">Inicio</a>
+      <a href="index.html#gorritos">Gorritos</a>
+      <a href="index.html#scrunchies">Scrunchies</a>
+      <a href="mi-cuenta.html">Mi cuenta</a>
+    </nav>
+    <div class="header-actions">
+      <a href="mi-cuenta.html" id="authLink" class="btn btn-primary btn-small">Mi cuenta</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="main-nav">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="account-section">
+    <div class="wrap">
+      <div class="section-head account-head">
+        <p class="eyebrow">Mi cuenta</p>
+        <h1 id="greeting">Hola</h1>
+        <button type="button" class="btn btn-outline" id="logoutBtn">Cerrar sesión</button>
+      </div>
+
+      <div class="account-grid">
+        <div class="account-block">
+          <h2>Mis pedidos</h2>
+          <div id="ordersList" class="account-list">
+            <p class="account-empty">Todavía no hiciste ningún pedido.</p>
+          </div>
+        </div>
+
+        <div class="account-block">
+          <h2>Mis favoritos</h2>
+          <div id="favoritesList" class="account-list account-list-grid">
+            <p class="account-empty">Todavía no marcaste favoritos.</p>
+          </div>
+        </div>
+
+        <div class="account-block">
+          <h2>Avisos de stock</h2>
+          <div id="alertsList" class="account-list">
+            <p class="account-empty">No tenés avisos de stock pendientes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-bottom">
+    <p>© <span id="year"></span> Rizos Satinados. Diseño y costura artesanal en Montevideo.</p>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+<script type="module" src="js/my-account.js"></script>
+</body>
+</html>

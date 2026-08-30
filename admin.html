@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de administración — Rizos Satinados</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%233E1B4D'/%3E%3Ctext x='50' y='68' font-family='Georgia, serif' font-size='58' font-style='italic' fill='%23FBF3EF' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="index.html" class="logo">Rizos <span>Satinados</span></a>
+    <nav class="main-nav" id="main-nav">
+      <a href="index.html">Inicio</a>
+      <a href="mi-cuenta.html">Mi cuenta</a>
+    </nav>
+    <div class="header-actions">
+      <a href="mi-cuenta.html" id="authLink" class="btn btn-primary btn-small">Mi cuenta</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="main-nav">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="admin-section" id="adminGate" hidden>
+    <div class="wrap">
+      <p class="account-empty">Esta página es solo para la administración de Rizos Satinados.</p>
+    </div>
+  </section>
+
+  <section class="admin-section" id="adminContent" hidden>
+    <div class="wrap">
+      <div class="section-head account-head">
+        <p class="eyebrow">Panel privado</p>
+        <h1>Administración</h1>
+      </div>
+
+      <div class="admin-block">
+        <h2>Agregar producto nuevo</h2>
+        <form id="newProductForm" class="admin-form">
+          <label>Categoría
+            <select name="category" required>
+              <option value="gorrito">Gorrito</option>
+              <option value="scrunchie">Scrunchie</option>
+            </select>
+          </label>
+          <label>Nombre <input type="text" name="name" required></label>
+          <label>Color <input type="text" name="color"></label>
+          <label>Precio <input type="number" name="price" min="0" step="1" value="0"></label>
+          <label>Stock <input type="number" name="stock" min="0" step="1" value="0"></label>
+          <label>Ruta de imagen (dentro de /img) <input type="text" name="image_path" placeholder="img/nuevo-producto.jpg" required></label>
+          <button type="submit" class="btn btn-primary">Agregar</button>
+        </form>
+      </div>
+
+      <div class="admin-block">
+        <h2>Productos</h2>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="productsTable">
+            <thead>
+              <tr><th>Producto</th><th>Precio</th><th>Stock</th><th>Activo</th><th></th></tr>
+            </thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="admin-block">
+        <h2>Pedidos</h2>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="ordersTable">
+            <thead>
+              <tr><th>Fecha</th><th>Clienta</th><th>Productos</th><th>Total</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-bottom">
+    <p>© <span id="year"></span> Rizos Satinados. Diseño y costura artesanal en Montevideo.</p>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>
