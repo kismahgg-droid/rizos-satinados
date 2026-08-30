@@ -793,10 +793,14 @@ section { padding: 88px 0; }
   background: var(--cream);
   font: inherit;
 }
+.admin-photo-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; align-self: end; }
+.admin-photo-preview[hidden] { display: none; }
 .admin-table-wrap { overflow-x: auto; }
 .admin-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .admin-table th, .admin-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--cream-alt); white-space: nowrap; }
 .admin-input { width: 80px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--cream-alt); font: inherit; }
+.admin-product-cell { display: flex; align-items: center; gap: 10px; white-space: normal; }
+.admin-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
 .admin-table select.admin-input { width: auto; }
 
 .orders-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }

@@ -6,6 +6,7 @@ import {
   adminDeleteProduct,
   adminListOrders,
   adminUpdateOrderStatus,
+  uploadProductImage,
   money,
   renderAuthHeader,
 } from "./supabase-client.js";
@@ -21,12 +22,19 @@ let currentOrderFilter = "todos";
 function productRow(p) {
   return `
     <tr data-id="${p.id}">
-      <td>${p.category === "gorrito" ? "Gorrito" : "Scrunchie"} · ${p.name}${p.color ? " (" + p.color + ")" : ""}</td>
+      <td>
+        <div class="admin-product-cell">
+          <img src="${p.image_path}" alt="${p.name}" class="admin-thumb" loading="lazy">
+          <span>${p.category === "gorrito" ? "Gorrito" : "Scrunchie"} · ${p.name}${p.color ? " (" + p.color + ")" : ""}</span>
+        </div>
+      </td>
       <td><input type="number" class="admin-input price-input" min="0" step="1" value="${p.price}"></td>
       <td><input type="number" class="admin-input stock-input" min="0" step="1" value="${p.stock}"></td>
       <td><input type="checkbox" class="active-input" ${p.active ? "checked" : ""}></td>
       <td>
         <button type="button" class="btn btn-outline btn-small save-btn">Guardar</button>
+        <button type="button" class="btn btn-outline btn-small photo-btn">Cambiar foto</button>
+        <input type="file" class="photo-input" accept="image/*" hidden>
         <button type="button" class="btn btn-outline btn-small delete-btn">Borrar</button>
       </td>
     </tr>`;
@@ -110,6 +118,43 @@ function renderProductsTable(products) {
       if (error) {
         console.error("Error al borrar producto:", error);
         alert(`No se pudo borrar el producto.\n\n${error.message || error}`);
+        return;
+      }
+      await refreshAll();
+    });
+
+    const photoBtn = row.querySelector(".photo-btn");
+    const photoInput = row.querySelector(".photo-input");
+    photoBtn.addEventListener("click", () => photoInput.click());
+    photoInput.addEventListener("change", async () => {
+      const file = photoInput.files[0];
+      if (!file) return;
+      photoBtn.disabled = true;
+      photoBtn.textContent = "Subiendo…";
+      const upload = await uploadProductImage(file);
+      if (upload.error) {
+        console.error("Error al subir la foto:", upload.error);
+        photoBtn.disabled = false;
+        photoBtn.textContent = "Cambiar foto";
+        alert(`No se pudo subir la foto.\n\n${upload.error.message || upload.error}`);
+        return;
+      }
+      const { error } = await adminUpsertProduct({
+        id,
+        category: original?.category,
+        name: original?.name,
+        color: original?.color ?? null,
+        price: Number(row.querySelector(".price-input").value) || 0,
+        stock: Number(row.querySelector(".stock-input").value) || 0,
+        image_path: upload.url,
+        description: original?.description ?? null,
+        active: row.querySelector(".active-input").checked,
+      });
+      if (error) {
+        console.error("Error al actualizar la foto del producto:", error);
+        photoBtn.disabled = false;
+        photoBtn.textContent = "Cambiar foto";
+        alert(`No se pudo guardar la nueva foto.\n\n${error.message || error}`);
         return;
       }
       await refreshAll();
@@ -311,24 +356,56 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await refreshAll();
 
-  document.getElementById("newProductForm").addEventListener("submit", async (e) => {
+  const newProductForm = document.getElementById("newProductForm");
+  const newProductPreview = document.getElementById("newProductPreview");
+  newProductForm.image_file.addEventListener("change", () => {
+    const file = newProductForm.image_file.files[0];
+    if (!file) {
+      newProductPreview.hidden = true;
+      return;
+    }
+    newProductPreview.src = URL.createObjectURL(file);
+    newProductPreview.hidden = false;
+  });
+
+  newProductForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
+    const file = fd.get("image_file");
+    if (!file || !file.size) {
+      alert("Elegí una foto para el producto.");
+      return;
+    }
+    const submitBtn = newProductForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Subiendo foto…";
+    const upload = await uploadProductImage(file);
+    if (upload.error) {
+      console.error("Error al subir la foto:", upload.error);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Agregar";
+      alert(`No se pudo subir la foto.\n\n${upload.error.message || upload.error}`);
+      return;
+    }
+    submitBtn.textContent = "Guardando…";
     const { error } = await adminUpsertProduct({
       category: fd.get("category"),
       name: fd.get("name"),
       color: fd.get("color") || null,
       price: Number(fd.get("price")) || 0,
       stock: Number(fd.get("stock")) || 0,
-      image_path: fd.get("image_path"),
+      image_path: upload.url,
       active: true,
     });
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Agregar";
     if (error) {
       console.error("Error al agregar producto:", error);
       alert(`No se pudo agregar el producto.\n\n${error.message || error}`);
       return;
     }
-    e.target.reset();
+    newProductForm.reset();
+    newProductPreview.hidden = true;
     await refreshAll();
   });
 });

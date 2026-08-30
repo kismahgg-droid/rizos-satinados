@@ -89,7 +89,10 @@
                 <label>Color <input type="text" name="color"></label>
                 <label>Precio <input type="number" name="price" min="0" step="1" value="0"></label>
                 <label>Stock <input type="number" name="stock" min="0" step="1" value="0"></label>
-                <label>Ruta de imagen (dentro de /img) <input type="text" name="image_path" placeholder="img/nuevo-producto.jpg" required></label>
+                <label>Foto del producto
+                  <input type="file" name="image_file" accept="image/*" required>
+                </label>
+                <img class="admin-photo-preview" id="newProductPreview" hidden alt="Vista previa">
                 <button type="submit" class="btn btn-primary">Agregar</button>
               </form>
             </div>

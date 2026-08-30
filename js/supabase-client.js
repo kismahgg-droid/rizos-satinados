@@ -182,6 +182,20 @@ export async function adminUpsertProduct(product) {
   return supabase.from("products").upsert(product).select();
 }
 
+// Sube una foto al bucket público "product-images" y devuelve su URL pública
+// para usarla como image_path del producto.
+export async function uploadProductImage(file) {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const path = `${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from("product-images").upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+  });
+  if (error) return { error };
+  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
 export async function adminDeleteProduct(id) {
   return supabase.from("products").delete().eq("id", id);
 }
