@@ -41,6 +41,18 @@ export async function signInWithProvider(provider) {
   });
 }
 
+export async function updateProfile(userId, { fullName, phone }) {
+  return supabase.from("profiles").update({ full_name: fullName, phone }).eq("id", userId);
+}
+
+export async function updateEmail(newEmail) {
+  return supabase.auth.updateUser({ email: newEmail });
+}
+
+export async function updatePassword(newPassword) {
+  return supabase.auth.updateUser({ password: newPassword });
+}
+
 export async function getActiveProducts() {
   const { data, error } = await supabase
     .from("products")

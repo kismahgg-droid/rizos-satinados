@@ -52,6 +52,7 @@
           <button type="button" class="account-nav-item" data-tab="favoritos">Favoritos</button>
           <button type="button" class="account-nav-item" data-tab="pagos">Pagos</button>
           <button type="button" class="account-nav-item" data-tab="avisos">Avisos</button>
+          <button type="button" class="account-nav-item" data-tab="cuenta">Mis datos</button>
           <a href="admin.html" class="account-nav-item account-nav-admin" id="adminNavLink" hidden>Administración</a>
           <button type="button" class="account-nav-item account-nav-logout" id="logoutBtn">Cerrar sesión</button>
         </nav>
@@ -86,6 +87,49 @@
             <div id="alertsList" class="account-list account-list-grid">
               <p class="account-empty">No tenés avisos de stock pendientes.</p>
             </div>
+          </div>
+
+          <div class="account-panel" data-panel="cuenta">
+            <h2>Mis datos</h2>
+            <form id="profileForm" class="auth-form">
+              <label>Nombre completo
+                <input type="text" name="full_name">
+              </label>
+              <label>Teléfono
+                <input type="text" name="phone" placeholder="09X XXX XXX">
+              </label>
+              <p class="auth-error" id="profileError" hidden></p>
+              <p class="auth-success" id="profileSuccess" hidden></p>
+              <button type="submit" class="btn btn-primary">Guardar datos</button>
+            </form>
+
+            <hr class="account-divider">
+
+            <h2>Cambiar email</h2>
+            <form id="emailForm" class="auth-form">
+              <label>Nuevo email
+                <input type="email" name="email" required>
+              </label>
+              <p class="auth-hint">Te vamos a pedir que confirmes el cambio desde tu correo nuevo.</p>
+              <p class="auth-error" id="emailError" hidden></p>
+              <p class="auth-success" id="emailSuccess" hidden></p>
+              <button type="submit" class="btn btn-outline">Cambiar email</button>
+            </form>
+
+            <hr class="account-divider">
+
+            <h2>Cambiar contraseña</h2>
+            <form id="passwordForm" class="auth-form">
+              <label>Nueva contraseña
+                <input type="password" name="password" minlength="6" required autocomplete="new-password">
+              </label>
+              <label>Repetir contraseña
+                <input type="password" name="password_confirm" minlength="6" required autocomplete="new-password">
+              </label>
+              <p class="auth-error" id="passwordError" hidden></p>
+              <p class="auth-success" id="passwordSuccess" hidden></p>
+              <button type="submit" class="btn btn-outline">Cambiar contraseña</button>
+            </form>
           </div>
         </div>
       </div>
@@ -159,6 +203,16 @@
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.97.24 2.43.41.55.2.99.46 1.42.9.44.43.7.87.9 1.42.17.46.36 1.26.41 2.43.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.24 1.97-.41 2.43-.2.55-.46.99-.9 1.42-.43.44-.87.7-1.42.9-.46.17-1.26.36-2.43.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.97-.24-2.43-.41a3.9 3.9 0 0 1-1.42-.9 3.9 3.9 0 0 1-.9-1.42c-.17-.46-.36-1.26-.41-2.43C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.24-1.97.41-2.43.2-.55.46-.99.9-1.42.43-.44.87-.7 1.42-.9.46-.17 1.26-.36 2.43-.41C8.42 2.21 8.8 2.2 12 2.2Zm0 1.98c-3.15 0-3.5.01-4.73.07-.96.04-1.48.2-1.83.34-.46.18-.79.39-1.13.73-.34.34-.55.67-.73 1.13-.14.35-.3.87-.34 1.83-.06 1.23-.07 1.58-.07 4.73s.01 3.5.07 4.73c.04.96.2 1.48.34 1.83.18.46.39.79.73 1.13.34.34.67.55 1.13.73.35.14.87.3 1.83.34 1.23.06 1.58.07 4.73.07s3.5-.01 4.73-.07c.96-.04 1.48-.2 1.83-.34.46-.18.79-.39 1.13-.73.34-.34.55-.67.73-1.13.14-.35.3-.87.34-1.83.06-1.23.07-1.58.07-4.73s-.01-3.5-.07-4.73c-.04-.96-.2-1.48-.34-1.83a3.03 3.03 0 0 0-.73-1.13 3.03 3.03 0 0 0-1.13-.73c-.35-.14-.87-.3-1.83-.34C15.5 4.19 15.15 4.18 12 4.18Zm0 3.37a4.45 4.45 0 1 1 0 8.9 4.45 4.45 0 0 1 0-8.9Zm0 1.98a2.47 2.47 0 1 0 0 4.94 2.47 2.47 0 0 0 0-4.94Zm4.66-2.2a1.04 1.04 0 1 1 0 2.08 1.04 1.04 0 0 1 0-2.08Z"/></svg>
     Coordinar entrega
   </button>
+</div>
+
+<div class="prex-backdrop" id="confirmBackdrop"></div>
+<div class="prex-modal confirm-modal" id="confirmModal" role="dialog" aria-modal="true" aria-label="Confirmar">
+  <p class="contact-menu-title" id="confirmTitle">¿Estás segura?</p>
+  <p class="success-text" id="confirmMessage"></p>
+  <div class="confirm-modal-actions">
+    <button type="button" class="btn btn-outline" id="confirmCancelBtn">Cancelar</button>
+    <button type="button" class="btn btn-primary" id="confirmOkBtn">Confirmar</button>
+  </div>
 </div>
 
 <script src="js/script.js"></script>

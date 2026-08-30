@@ -5,6 +5,9 @@ import {
   getMyFavoriteProducts,
   getMyStockAlerts,
   signOut,
+  updateProfile,
+  updateEmail,
+  updatePassword,
   money,
   renderAuthHeader,
 } from "./supabase-client.js";
@@ -93,6 +96,121 @@ function renderPayments(orders) {
     .join("");
 }
 
+function showFeedback(errorEl, successEl, message, isError) {
+  errorEl.hidden = !isError;
+  successEl.hidden = isError;
+  (isError ? errorEl : successEl).textContent = message;
+}
+
+function wireAccountForms(session, profile) {
+  const profileForm = document.getElementById("profileForm");
+  if (profileForm) {
+    profileForm.full_name.value = profile?.full_name || "";
+    profileForm.phone.value = profile?.phone || "";
+    const errorEl = document.getElementById("profileError");
+    const successEl = document.getElementById("profileSuccess");
+    profileForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      successEl.hidden = true;
+      const { error } = await updateProfile(session.user.id, {
+        fullName: profileForm.full_name.value.trim(),
+        phone: profileForm.phone.value.trim(),
+      });
+      if (error) {
+        console.error("Error al guardar los datos:", error);
+        showFeedback(errorEl, successEl, "No se pudieron guardar los datos. Probá de nuevo.", true);
+        return;
+      }
+      showFeedback(errorEl, successEl, "Datos guardados ✓", false);
+    });
+  }
+
+  const emailForm = document.getElementById("emailForm");
+  if (emailForm) {
+    emailForm.email.value = session.user.email || "";
+    const errorEl = document.getElementById("emailError");
+    const successEl = document.getElementById("emailSuccess");
+    emailForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      successEl.hidden = true;
+      const { error } = await updateEmail(emailForm.email.value.trim());
+      if (error) {
+        console.error("Error al cambiar el email:", error);
+        showFeedback(errorEl, successEl, error.message || "No se pudo cambiar el email. Probá de nuevo.", true);
+        return;
+      }
+      showFeedback(errorEl, successEl, "Te enviamos un correo a tu email nuevo para confirmar el cambio.", false);
+    });
+  }
+
+  const passwordForm = document.getElementById("passwordForm");
+  if (passwordForm) {
+    const errorEl = document.getElementById("passwordError");
+    const successEl = document.getElementById("passwordSuccess");
+    passwordForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      successEl.hidden = true;
+      if (passwordForm.password.value !== passwordForm.password_confirm.value) {
+        showFeedback(errorEl, successEl, "Las contraseñas no coinciden.", true);
+        return;
+      }
+      const { error } = await updatePassword(passwordForm.password.value);
+      if (error) {
+        console.error("Error al cambiar la contraseña:", error);
+        showFeedback(errorEl, successEl, error.message || "No se pudo cambiar la contraseña. Probá de nuevo.", true);
+        return;
+      }
+      passwordForm.reset();
+      showFeedback(errorEl, successEl, "Contraseña actualizada ✓", false);
+    });
+  }
+}
+
+// Reemplazo del confirm() nativo del navegador por un modal propio.
+// Devuelve una promesa que resuelve true/false según lo que elija la clienta.
+function showConfirm({ title = "¿Estás segura?", message = "", confirmText = "Confirmar", danger = false } = {}) {
+  const modal = document.getElementById("confirmModal");
+  const backdrop = document.getElementById("confirmBackdrop");
+  if (!modal || !backdrop) return Promise.resolve(window.confirm(message || title));
+
+  return new Promise((resolve) => {
+    document.getElementById("confirmTitle").textContent = title;
+    document.getElementById("confirmMessage").textContent = message;
+    const okBtn = document.getElementById("confirmOkBtn");
+    const cancelBtn = document.getElementById("confirmCancelBtn");
+    okBtn.textContent = confirmText;
+    okBtn.classList.toggle("btn-danger", danger);
+
+    const close = (result) => {
+      modal.classList.remove("open");
+      backdrop.classList.remove("open");
+      document.body.style.overflow = "";
+      okBtn.removeEventListener("click", onOk);
+      cancelBtn.removeEventListener("click", onCancel);
+      backdrop.removeEventListener("click", onCancel);
+      document.removeEventListener("keydown", onKeydown);
+      resolve(result);
+    };
+    const onOk = () => close(true);
+    const onCancel = () => close(false);
+    const onKeydown = (e) => {
+      if (e.key === "Escape") close(false);
+    };
+
+    okBtn.addEventListener("click", onOk);
+    cancelBtn.addEventListener("click", onCancel);
+    backdrop.addEventListener("click", onCancel);
+    document.addEventListener("keydown", onKeydown);
+
+    modal.classList.add("open");
+    backdrop.classList.add("open");
+    document.body.style.overflow = "hidden";
+  });
+}
+
 function wireTabs() {
   const nav = document.getElementById("accountNav");
   if (!nav) return;
@@ -126,6 +244,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("adminNavLink").hidden = false;
   }
 
+  wireAccountForms(session, profile);
+
   const [orders, favorites, alerts] = await Promise.all([
     getMyOrders(session.user.id),
     getMyFavoriteProducts(session.user.id),
@@ -137,7 +257,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderAlerts(alerts);
 
   document.getElementById("logoutBtn").addEventListener("click", async () => {
-    if (!confirm("¿Seguro que querés cerrar sesión?")) return;
+    const ok = await showConfirm({
+      title: "¿Cerrar sesión?",
+      message: "Vas a tener que volver a iniciar sesión para ver tu cuenta.",
+      confirmText: "Cerrar sesión",
+      danger: true,
+    });
+    if (!ok) return;
     await signOut();
     window.location.href = "index.html";
   });

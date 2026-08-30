@@ -720,6 +720,8 @@ section { padding: 88px 0; }
 .account-panel { display: none; }
 .account-panel.is-active { display: block; }
 .account-panel h2 { font-size: 1.1rem; margin-bottom: 16px; }
+.account-panel .auth-form { max-width: 380px; }
+.account-divider { border: none; border-top: 1px solid var(--cream-alt); margin: 28px 0; }
 .account-panel-head {
   display: flex;
   align-items: center;
@@ -1088,6 +1090,13 @@ section { padding: 88px 0; }
 }
 .success-text { color: var(--ink-soft); font-size: .92rem; margin-bottom: 20px; }
 .success-modal .btn { width: 100%; justify-content: center; }
+
+.confirm-modal { text-align: center; }
+.confirm-modal .success-text { margin-bottom: 22px; }
+.confirm-modal-actions { display: flex; gap: 10px; }
+.confirm-modal-actions .btn { flex: 1; justify-content: center; }
+.confirm-modal-actions .btn-danger { background: #B3261E; color: var(--white); box-shadow: none; }
+.confirm-modal-actions .btn-danger:hover { background: #932019; }
 
 .reveal {
   opacity: 0;
