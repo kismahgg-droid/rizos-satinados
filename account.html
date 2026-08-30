@@ -107,8 +107,44 @@
   <div class="cart-footer">
     <div class="cart-total-row"><span>Total</span><span id="cartTotal">$ 0</span></div>
     <button type="button" class="btn btn-primary js-contact" id="cartCheckoutBtn" data-msg="" hidden>Finalizar por WhatsApp/Instagram</button>
+    <button type="button" class="btn btn-outline btn-prex" id="cartPrexBtn" hidden>Pagar con Prex</button>
   </div>
 </aside>
+
+<div class="prex-backdrop" id="prexBackdrop"></div>
+<div class="prex-modal" id="prexModal" role="dialog" aria-modal="true" aria-label="Pagar con Prex">
+  <button type="button" class="contact-menu-close" id="prexClose" aria-label="Cerrar">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+  <p class="contact-menu-title">Pagar con Prex</p>
+  <div class="prex-info">
+    <p>Transferí el total por Prex a:</p>
+    <p class="prex-info-line"><strong>Miranda Parrilla</strong></p>
+    <p class="prex-info-line">Nº Prex: <strong>1395033</strong></p>
+    <p class="prex-info-total">Total del pedido: <span id="prexTotal">$ 0</span></p>
+  </div>
+  <form id="prexForm" class="auth-form">
+    <label>Nombre y apellido
+      <input type="text" name="guest_name" required>
+    </label>
+    <label>Email
+      <input type="email" name="guest_email" required>
+    </label>
+    <div class="prex-contact-choice">
+      <label class="prex-radio"><input type="radio" name="contact_method" value="telefono" checked> Teléfono</label>
+      <label class="prex-radio"><input type="radio" name="contact_method" value="instagram"> Instagram</label>
+    </div>
+    <label id="prexContactLabel">Tu teléfono
+      <input type="text" name="contact_value" required placeholder="09X XXX XXX">
+    </label>
+    <label>Código de transferencia
+      <input type="text" name="transfer_code" required>
+    </label>
+    <p class="auth-hint">Estos datos son solo para poder contactarte y confirmar tu pago.</p>
+    <p class="auth-error" id="prexError" hidden></p>
+    <button type="submit" class="btn btn-primary">Confirmar pago</button>
+  </form>
+</div>
 
 <script src="js/script.js"></script>
 <script type="module" src="js/account.js"></script>

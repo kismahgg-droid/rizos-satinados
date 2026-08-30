@@ -70,7 +70,7 @@ function renderAlerts(alerts) {
     .join("");
 }
 
-const PAYMENT_LABELS = { efectivo: "Efectivo", transferencia: "Transferencia" };
+const PAYMENT_LABELS = { efectivo: "Efectivo", transferencia: "Transferencia", prex: "Prex" };
 
 function renderPayments(orders) {
   const el = document.getElementById("paymentsList");

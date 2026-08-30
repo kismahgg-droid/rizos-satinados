@@ -107,6 +107,38 @@ export async function createOrderWithItems(userId, items) {
   return order;
 }
 
+export async function createPrexOrder({ items, guestName, guestEmail, contactMethod, contactValue, transferCode }) {
+  const total = items.reduce((sum, it) => sum + it.price * it.qty, 0);
+  const session = await getSession();
+  // Generamos el id del lado del cliente: una invitada sin cuenta puede
+  // insertar su pedido, pero no puede releerlo (RLS), así que no podemos
+  // depender del id que devolvería la base tras el insert.
+  const orderId = crypto.randomUUID();
+  const payload = {
+    id: orderId,
+    payment_method: "prex",
+    total,
+    guest_name: guestName,
+    guest_email: guestEmail,
+    contact_method: contactMethod,
+    contact_value: contactValue,
+    transfer_code: transferCode,
+  };
+  if (session) payload.customer_id = session.user.id;
+
+  const { error } = await supabase.from("orders").insert(payload);
+  if (error) throw error;
+  const rows = items.map((it) => ({
+    order_id: orderId,
+    product_id: it.product_id,
+    qty: it.qty,
+    unit_price: it.price,
+  }));
+  const { error: itemsError } = await supabase.from("order_items").insert(rows);
+  if (itemsError) throw itemsError;
+  return { id: orderId };
+}
+
 export async function getMyOrders(userId) {
   const { data } = await supabase
     .from("orders")

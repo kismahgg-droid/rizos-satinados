@@ -21,11 +21,17 @@ create table public.products (
 
 create table public.orders (
   id uuid primary key default gen_random_uuid(),
-  customer_id uuid not null references public.profiles(id) on delete cascade,
+  customer_id uuid references public.profiles(id) on delete cascade,
   status text not null default 'pendiente' check (status in ('pendiente','confirmado','entregado','cancelado')),
-  payment_method text check (payment_method in ('efectivo','transferencia')),
+  payment_method text check (payment_method in ('efectivo','transferencia','prex')),
   total numeric not null default 0,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- Datos de compradoras invitadas (sin cuenta) y de pagos por Prex.
+  guest_name text,
+  guest_email text,
+  contact_method text check (contact_method in ('telefono','instagram')),
+  contact_value text,
+  transfer_code text
 );
 
 create table public.order_items (
@@ -114,6 +120,8 @@ create policy "orders: self or admin read" on public.orders
   for select using (customer_id = auth.uid() or public.is_admin());
 create policy "orders: self insert" on public.orders
   for insert with check (customer_id = auth.uid());
+create policy "orders: guest insert" on public.orders
+  for insert with check (customer_id is null);
 create policy "orders: admin update" on public.orders
   for update using (public.is_admin());
 
@@ -125,6 +133,25 @@ create policy "order_items: self insert" on public.order_items
   for insert with check (
     exists (select 1 from public.orders o where o.id = order_id and o.customer_id = auth.uid())
   );
+
+-- La política de invitada no puede hacer un EXISTS directo contra "orders":
+-- esa subconsulta queda sujeta a la misma RLS de "orders", y una invitada
+-- no tiene permiso de SELECT sobre su propio pedido (customer_id is null).
+-- Por eso se verifica a través de una función security definer, que sí
+-- puede leer la tabla sin pasar por RLS.
+create function public.order_is_guest(check_order_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.orders where id = check_order_id and customer_id is null
+  );
+$$;
+
+create policy "order_items: guest insert" on public.order_items
+  for insert with check (public.order_is_guest(order_id));
 
 create policy "favorites: self all" on public.favorites
   for all using (customer_id = auth.uid()) with check (customer_id = auth.uid());

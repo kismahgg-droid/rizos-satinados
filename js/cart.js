@@ -1,6 +1,7 @@
-import { getSession, createOrderWithItems, money } from "./supabase-client.js";
+import { getSession, createOrderWithItems, createPrexOrder, money } from "./supabase-client.js";
 
 const CART_KEY = "rs_cart";
+const INSTAGRAM_DM_URL = "https://ig.me/m/rizos.satinados";
 
 function getCart() {
   try {
@@ -87,10 +88,14 @@ function renderCart() {
     itemsEl.innerHTML = '<p class="account-empty">Todavía no agregaste productos.</p>';
     if (totalEl) totalEl.textContent = money(0);
     if (checkoutBtn) checkoutBtn.hidden = true;
+    const prexBtn = document.getElementById("cartPrexBtn");
+    if (prexBtn) prexBtn.hidden = true;
     return;
   }
 
+  const prexBtn = document.getElementById("cartPrexBtn");
   if (checkoutBtn) checkoutBtn.hidden = false;
+  if (prexBtn) prexBtn.hidden = false;
   itemsEl.innerHTML = cart
     .map(
       (it) => `
@@ -157,4 +162,71 @@ document.addEventListener("DOMContentLoaded", () => {
     saveCart([]);
     closeDrawer();
   });
+
+  // Modal de pago con Prex
+  const prexModal = document.getElementById("prexModal");
+  const prexBackdrop = document.getElementById("prexBackdrop");
+  const prexForm = document.getElementById("prexForm");
+  if (prexModal && prexBackdrop && prexForm) {
+    const openPrex = () => {
+      const cart = getCart();
+      if (!cart.length) return;
+      document.getElementById("prexTotal").textContent = money(cartTotal(cart));
+      prexModal.classList.add("open");
+      prexBackdrop.classList.add("open");
+      document.body.style.overflow = "hidden";
+    };
+    const closePrex = () => {
+      prexModal.classList.remove("open");
+      prexBackdrop.classList.remove("open");
+      document.body.style.overflow = "";
+    };
+
+    document.getElementById("cartPrexBtn")?.addEventListener("click", openPrex);
+    document.getElementById("prexClose")?.addEventListener("click", closePrex);
+    prexBackdrop.addEventListener("click", closePrex);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closePrex();
+    });
+
+    const contactLabel = document.getElementById("prexContactLabel");
+    const contactInput = prexForm.contact_value;
+    prexForm.querySelectorAll('input[name="contact_method"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        const isPhone = radio.value === "telefono" && radio.checked;
+        if (radio.checked) {
+          contactLabel.firstChild.textContent = radio.value === "telefono" ? "Tu teléfono " : "Tu Instagram ";
+          contactInput.placeholder = radio.value === "telefono" ? "09X XXX XXX" : "@tu.usuario";
+        }
+      });
+    });
+
+    prexForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const cart = getCart();
+      if (!cart.length) return;
+      const errorEl = document.getElementById("prexError");
+      errorEl.hidden = true;
+      const fd = new FormData(prexForm);
+      try {
+        await createPrexOrder({
+          items: cart,
+          guestName: fd.get("guest_name"),
+          guestEmail: fd.get("guest_email"),
+          contactMethod: fd.get("contact_method"),
+          contactValue: fd.get("contact_value"),
+          transferCode: fd.get("transfer_code"),
+        });
+      } catch (err) {
+        console.error(err);
+        errorEl.textContent = "No se pudo registrar el pago. Probá de nuevo.";
+        errorEl.hidden = false;
+        return;
+      }
+      saveCart([]);
+      closePrex();
+      closeDrawer();
+      window.location.href = INSTAGRAM_DM_URL;
+    });
+  }
 });

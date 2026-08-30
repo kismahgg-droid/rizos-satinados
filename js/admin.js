@@ -11,6 +11,7 @@ import {
 } from "./supabase-client.js";
 
 const STATUSES = ["pendiente", "confirmado", "entregado", "cancelado"];
+const PAYMENT_LABELS = { efectivo: "Efectivo", transferencia: "Transferencia", prex: "Prex" };
 
 function productRow(p) {
   return `
@@ -31,12 +32,23 @@ function orderRow(o) {
   const options = STATUSES.map(
     (s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>`
   ).join("");
+  const clientName = o.profiles?.full_name || o.guest_name || "—";
+  const contactBits = [];
+  if (o.profiles?.phone) contactBits.push(o.profiles.phone);
+  if (o.guest_email) contactBits.push(o.guest_email);
+  if (o.contact_value) {
+    contactBits.push(`${o.contact_method === "instagram" ? "IG" : "Tel"}: ${o.contact_value}`);
+  }
+  const payment = o.payment_method ? PAYMENT_LABELS[o.payment_method] || o.payment_method : "—";
   return `
     <tr data-id="${o.id}">
       <td>${new Date(o.created_at).toLocaleDateString("es-UY")}</td>
-      <td>${o.profiles?.full_name || "—"}${o.profiles?.phone ? " · " + o.profiles.phone : ""}</td>
+      <td>${clientName}${!o.profiles ? " (invitada)" : ""}</td>
+      <td>${contactBits.join(" · ") || "—"}</td>
       <td>${items}</td>
       <td>${money(o.total)}</td>
+      <td>${payment}</td>
+      <td>${o.transfer_code || "—"}</td>
       <td><select class="admin-input status-select">${options}</select></td>
     </tr>`;
 }
