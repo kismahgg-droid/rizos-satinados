@@ -55,14 +55,6 @@ function cartCount(cart) {
   return cart.reduce((sum, it) => sum + it.qty, 0);
 }
 
-function itemsSummary(cart) {
-  return cart.map((it) => `${it.qty} × ${it.name}${it.color ? " (" + it.color + ")" : ""}`).join(", ");
-}
-
-function prexCheckoutMessage(cart, transferCode) {
-  return `Hola, compré ${itemsSummary(cart)}, este es mi código de transferencia ${transferCode}.`;
-}
-
 function openDrawer() {
   document.getElementById("cartDrawer")?.classList.add("open");
   document.getElementById("cartBackdrop")?.classList.add("open");
@@ -133,27 +125,17 @@ function renderCart() {
   if (totalEl) totalEl.textContent = money(cartTotal(cart));
 }
 
-// Copia un mensaje prearmado y abre el DM de Instagram en una pestaña nueva.
-async function goToInstagram(message) {
-  const hint = document.getElementById("successHint");
-  try {
-    await navigator.clipboard.writeText(message);
-    if (hint) hint.hidden = false;
-  } catch {
-    // Sin permiso de portapapeles: igual la dirigimos al DM.
-  }
+// Abre el DM de Instagram en una pestaña nueva.
+function goToInstagram() {
   window.open(INSTAGRAM_DM_URL, "_blank", "noopener");
 }
 
-// Panel de éxito post-pago: confirma el pago y sirve de respaldo por si el
-// navegador bloqueó la apertura automática de Instagram (pop-up blocker).
-function openSuccess(message) {
+// Panel de éxito post-pago: se muestra tras confirmar el pago; desde acá
+// la clienta toca "Coordinar entrega" para ir a Instagram.
+function openSuccess() {
   const modal = document.getElementById("successModal");
   const backdrop = document.getElementById("successBackdrop");
-  const hint = document.getElementById("successHint");
   if (!modal || !backdrop) return;
-  modal.dataset.msg = message;
-  if (hint) hint.hidden = true;
   modal.classList.add("open");
   backdrop.classList.add("open");
   document.body.style.overflow = "hidden";
@@ -183,9 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") closeSuccess();
     });
-    document.getElementById("coordinarEntregaBtn")?.addEventListener("click", () => {
-      goToInstagram(successModal.dataset.msg || "Hola, quiero coordinar mi pedido.");
-    });
+    document.getElementById("coordinarEntregaBtn")?.addEventListener("click", goToInstagram);
   }
 
   // Modal de pago con Prex
@@ -214,17 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === "Escape") closePrex();
     });
 
-    const contactLabel = document.getElementById("prexContactLabel");
-    const contactInput = prexForm.contact_value;
-    prexForm.querySelectorAll('input[name="contact_method"]').forEach((radio) => {
-      radio.addEventListener("change", () => {
-        if (radio.checked) {
-          contactLabel.firstChild.textContent = radio.value === "telefono" ? "Tu teléfono " : "Tu Instagram ";
-          contactInput.placeholder = radio.value === "telefono" ? "09X XXX XXX" : "@tu.usuario";
-        }
-      });
-    });
-
     prexForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const cart = getCart();
@@ -238,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
           items: cart,
           guestName: fd.get("guest_name"),
           guestEmail: fd.get("guest_email"),
-          contactMethod: fd.get("contact_method"),
+          contactMethod: "instagram",
           contactValue: fd.get("contact_value"),
           transferCode,
         });
@@ -248,15 +217,12 @@ document.addEventListener("DOMContentLoaded", () => {
         errorEl.hidden = false;
         return;
       }
-      const message = prexCheckoutMessage(cart, transferCode);
       saveCart([]);
       closePrex();
       closeDrawer();
-      // Apenas se confirma el pago, la derivamos a Instagram automáticamente.
-      // El panel de éxito queda de respaldo por si el navegador bloqueó la
-      // apertura de la pestaña nueva.
-      openSuccess(message);
-      goToInstagram(message);
+      // Solo vamos a Instagram cuando la clienta toca "Coordinar entrega"
+      // en este panel, no automáticamente al confirmar el pago.
+      openSuccess();
     });
   }
 });

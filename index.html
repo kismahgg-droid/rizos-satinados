@@ -329,17 +329,13 @@
     <label>Email
       <input type="email" name="guest_email" required>
     </label>
-    <div class="prex-contact-choice">
-      <label class="prex-radio"><input type="radio" name="contact_method" value="telefono" checked> Teléfono</label>
-      <label class="prex-radio"><input type="radio" name="contact_method" value="instagram"> Instagram</label>
-    </div>
-    <label id="prexContactLabel">Tu teléfono
-      <input type="text" name="contact_value" required placeholder="09X XXX XXX">
+    <label>Tu Instagram
+      <input type="text" name="contact_value" required placeholder="@tu.usuario">
     </label>
     <label>Código de transferencia
       <input type="text" name="transfer_code" required>
     </label>
-    <p class="auth-hint">Estos datos son solo para poder contactarte y confirmar tu pago.</p>
+    <p class="auth-hint">Después de pagar te llevamos directo a Instagram para coordinar la entrega.</p>
     <p class="auth-error" id="prexError" hidden></p>
     <button type="submit" class="btn btn-primary">Confirmar pago</button>
   </form>
@@ -354,12 +350,11 @@
     <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
   </span>
   <p class="contact-menu-title">¡Gracias por tu compra!</p>
-  <p class="success-text">Para coordinar la entrega, escribinos por Instagram. Te copiamos un mensaje listo para pegar en el chat.</p>
+  <p class="success-text">Tocá el botón para escribirnos por Instagram y coordinar la entrega.</p>
   <button type="button" class="btn btn-primary" id="coordinarEntregaBtn">
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.97.24 2.43.41.55.2.99.46 1.42.9.44.43.7.87.9 1.42.17.46.36 1.26.41 2.43.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.24 1.97-.41 2.43-.2.55-.46.99-.9 1.42-.43.44-.87.7-1.42.9-.46.17-1.26.36-2.43.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.97-.24-2.43-.41a3.9 3.9 0 0 1-1.42-.9 3.9 3.9 0 0 1-.9-1.42c-.17-.46-.36-1.26-.41-2.43C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.24-1.97.41-2.43.2-.55.46-.99.9-1.42.43-.44.87-.7 1.42-.9.46-.17 1.26-.36 2.43-.41C8.42 2.21 8.8 2.2 12 2.2Zm0 1.98c-3.15 0-3.5.01-4.73.07-.96.04-1.48.2-1.83.34-.46.18-.79.39-1.13.73-.34.34-.55.67-.73 1.13-.14.35-.3.87-.34 1.83-.06 1.23-.07 1.58-.07 4.73s.01 3.5.07 4.73c.04.96.2 1.48.34 1.83.18.46.39.79.73 1.13.34.34.67.55 1.13.73.35.14.87.3 1.83.34 1.23.06 1.58.07 4.73.07s3.5-.01 4.73-.07c.96-.04 1.48-.2 1.83-.34.46-.18.79-.39 1.13-.73.34-.34.55-.67.73-1.13.14-.35.3-.87.34-1.83.06-1.23.07-1.58.07-4.73s-.01-3.5-.07-4.73c-.04-.96-.2-1.48-.34-1.83a3.03 3.03 0 0 0-.73-1.13 3.03 3.03 0 0 0-1.13-.73c-.35-.14-.87-.3-1.83-.34C15.5 4.19 15.15 4.18 12 4.18Zm0 3.37a4.45 4.45 0 1 1 0 8.9 4.45 4.45 0 0 1 0-8.9Zm0 1.98a2.47 2.47 0 1 0 0 4.94 2.47 2.47 0 0 0 0-4.94Zm4.66-2.2a1.04 1.04 0 1 1 0 2.08 1.04 1.04 0 0 1 0-2.08Z"/></svg>
     Coordinar entrega
   </button>
-  <p class="success-hint" id="successHint" hidden>Mensaje copiado ✓ Pegalo en el chat de Instagram.</p>
 </div>
 
 <script src="js/script.js"></script>

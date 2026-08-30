@@ -1001,9 +1001,6 @@ section { padding: 88px 0; }
 .prex-info p { margin: 0 0 4px; font-size: .88rem; color: var(--ink-soft); }
 .prex-info-line { font-size: 1rem !important; color: var(--plum-dark) !important; }
 .prex-info-total { margin-top: 8px !important; font-weight: 600; color: var(--rose) !important; }
-.prex-contact-choice { display: flex; gap: 20px; margin: -6px 0 -6px; }
-.prex-radio { flex-direction: row !important; align-items: center; gap: 6px !important; font-size: .9rem !important; color: var(--ink) !important; cursor: pointer; }
-.prex-radio input { width: auto; }
 
 .success-modal { text-align: center; }
 .success-icon {
@@ -1019,7 +1016,6 @@ section { padding: 88px 0; }
 }
 .success-text { color: var(--ink-soft); font-size: .92rem; margin-bottom: 20px; }
 .success-modal .btn { width: 100%; justify-content: center; }
-.success-hint { margin: 12px 0 0; font-size: .85rem; color: #1a7f4b; font-weight: 500; }
 
 .reveal {
   opacity: 0;
