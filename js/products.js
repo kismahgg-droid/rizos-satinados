@@ -19,18 +19,16 @@ function productAlt(product) {
 }
 
 function cardHTML(product, isFavorite) {
-  const hasRealStock = Number(product.price) > 0;
-  const outOfStock = hasRealStock && Number(product.stock) <= 0;
+  const stock = Number(product.stock) || 0;
+  const outOfStock = stock <= 0;
   const priceLine =
     Number(product.price) > 0
       ? `<p class="price">${money(product.price)}</p>`
       : `<p class="price price-tbd">Consultar precio</p>`;
 
-  const stockLine = !hasRealStock
-    ? `<p class="stock-line stock-unknown">Consultar disponibilidad</p>`
-    : outOfStock
+  const stockLine = outOfStock
     ? `<p class="stock-line stock-out">Sin stock</p>`
-    : `<p class="stock-line stock-in">${product.stock} disponible${product.stock === 1 ? "" : "s"}</p>`;
+    : `<p class="stock-line stock-in">${stock} disponible${stock === 1 ? "" : "s"}</p>`;
 
   const favButtonHTML = `
     <button type="button" class="fav-btn ${isFavorite ? "is-fav" : ""}" data-product-id="${product.id}" aria-label="Marcar como favorito">
@@ -45,7 +43,7 @@ function cardHTML(product, isFavorite) {
       </button>`;
 
   return `
-    <figure class="product-card reveal in-view" data-product-id="${product.id}">
+    <figure class="product-card ${outOfStock ? "out-of-stock" : ""} reveal in-view" data-product-id="${product.id}">
       <div class="product-img">
         ${outOfStock ? '<span class="out-badge">Sin stock</span>' : ""}
         <img src="${product.image_path}" alt="${productAlt(product)}" loading="lazy">

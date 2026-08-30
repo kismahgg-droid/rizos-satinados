@@ -7,11 +7,13 @@ import {
   adminListOrders,
   adminUpdateOrderStatus,
   money,
-  renderAuthHeader,
 } from "./supabase-client.js";
 
 const STATUSES = ["pendiente", "confirmado", "entregado", "cancelado"];
+const STATUS_LABELS = { pendiente: "Pendiente", confirmado: "Confirmado", entregado: "Entregado", cancelado: "Cancelado" };
+const STATUS_COLORS = { pendiente: "#5C2A72", confirmado: "#2fa360", entregado: "#1a7f4b", cancelado: "#B3261E" };
 const PAYMENT_LABELS = { efectivo: "Efectivo", transferencia: "Transferencia", prex: "Prex" };
+const PAYMENT_COLORS = { efectivo: "#2a78d6", transferencia: "#eb6834", prex: "#1baf7a" };
 
 function productRow(p) {
   return `
@@ -30,7 +32,7 @@ function productRow(p) {
 function orderRow(o) {
   const items = (o.order_items || []).map((it) => `${it.qty} × ${it.products?.name || "Producto"}`).join(", ");
   const options = STATUSES.map(
-    (s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>`
+    (s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${STATUS_LABELS[s]}</option>`
   ).join("");
   const clientName = o.profiles?.full_name || o.guest_name || "—";
   const contactBits = [];
@@ -53,8 +55,7 @@ function orderRow(o) {
     </tr>`;
 }
 
-async function loadProducts() {
-  const products = await adminListProducts();
+function renderProductsTable(products) {
   const tbody = document.getElementById("productsTableBody");
   tbody.innerHTML = products.map(productRow).join("");
 
@@ -67,17 +68,17 @@ async function loadProducts() {
       await adminUpsertProduct({ id, price, stock, active });
       row.querySelector(".save-btn").textContent = "Guardado ✓";
       setTimeout(() => (row.querySelector(".save-btn").textContent = "Guardar"), 1500);
+      await refreshAll();
     });
     row.querySelector(".delete-btn").addEventListener("click", async () => {
       if (!confirm("¿Borrar este producto?")) return;
       await adminDeleteProduct(id);
-      row.remove();
+      await refreshAll();
     });
   });
 }
 
-async function loadOrders() {
-  const orders = await adminListOrders();
+function renderOrdersTable(orders) {
   const tbody = document.getElementById("ordersTableBody");
   tbody.innerHTML = orders.map(orderRow).join("");
 
@@ -85,12 +86,134 @@ async function loadOrders() {
     const id = row.dataset.id;
     row.querySelector(".status-select").addEventListener("change", async (e) => {
       await adminUpdateOrderStatus(id, e.target.value);
+      await refreshAll();
     });
   });
 }
 
+// --- Estadísticas ---
+
+function statCard(label, value) {
+  return `<div class="stat-card"><p class="stat-label">${label}</p><p class="stat-value">${value}</p></div>`;
+}
+
+function renderStats(products, orders) {
+  const grid = document.getElementById("statsGrid");
+  if (!grid) return;
+  const activeOrders = orders.filter((o) => o.status !== "cancelado");
+  const totalVentas = activeOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+  const pendientes = orders.filter((o) => o.status === "pendiente").length;
+  const sinStock = products.filter((p) => Number(p.stock) <= 0).length;
+  const activos = products.filter((p) => p.active).length;
+
+  grid.innerHTML = [
+    statCard("Ventas totales", money(totalVentas)),
+    statCard("Pedidos totales", orders.length),
+    statCard("Pedidos pendientes", pendientes),
+    statCard("Productos activos", activos),
+    statCard("Productos sin stock", sinStock),
+  ].join("");
+}
+
+function renderBarList(elId, rows) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!rows.length || rows.every((r) => r.value === 0)) {
+    el.innerHTML = '<p class="chart-empty">Todavía no hay datos suficientes.</p>';
+    return;
+  }
+  const max = Math.max(...rows.map((r) => r.value), 1);
+  el.innerHTML = rows
+    .map((r) => {
+      const widthPct = r.value > 0 ? Math.max((r.value / max) * 100, 4) : 0;
+      return `
+        <div class="bar-row">
+          <span class="bar-row-label">${r.label}</span>
+          <span class="bar-track"><span class="bar-fill" style="width:${widthPct}%; background:${r.color || "var(--plum)"}"></span></span>
+          <span class="bar-row-value">${r.display}</span>
+        </div>`;
+    })
+    .join("");
+}
+
+function salesByDay(orders) {
+  const days = [];
+  const now = new Date();
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    days.push({ key, label: d.toLocaleDateString("es-UY", { day: "2-digit", month: "2-digit" }), value: 0 });
+  }
+  const byKey = Object.fromEntries(days.map((d) => [d.key, d]));
+  orders.forEach((o) => {
+    if (o.status === "cancelado") return;
+    const key = new Date(o.created_at).toISOString().slice(0, 10);
+    if (byKey[key]) byKey[key].value += Number(o.total || 0);
+  });
+  return days.map((d) => ({ label: d.label, value: d.value, display: money(d.value) }));
+}
+
+function topProductsData(orders) {
+  const counts = new Map();
+  orders.forEach((o) => {
+    if (o.status === "cancelado") return;
+    (o.order_items || []).forEach((it) => {
+      const name = it.products?.name || "Producto";
+      counts.set(name, (counts.get(name) || 0) + Number(it.qty || 0));
+    });
+  });
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([label, value]) => ({ label, value, display: String(value) }));
+}
+
+function statusDistribution(orders) {
+  return STATUSES.map((s) => {
+    const value = orders.filter((o) => o.status === s).length;
+    return { label: STATUS_LABELS[s], value, display: String(value), color: STATUS_COLORS[s] };
+  });
+}
+
+function paymentDistribution(orders) {
+  return Object.keys(PAYMENT_LABELS).map((m) => {
+    const value = orders.filter((o) => o.payment_method === m).length;
+    return { label: PAYMENT_LABELS[m], value, display: String(value), color: PAYMENT_COLORS[m] };
+  });
+}
+
+function renderCharts(orders) {
+  renderBarList("salesChart", salesByDay(orders));
+  renderBarList("topProductsChart", topProductsData(orders));
+  renderBarList("statusChart", statusDistribution(orders));
+  renderBarList("paymentChart", paymentDistribution(orders));
+}
+
+function wireTabs() {
+  const nav = document.getElementById("adminNav");
+  if (!nav) return;
+  nav.querySelectorAll(".account-nav-item[data-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      nav.querySelectorAll(".account-nav-item[data-tab]").forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      document.querySelectorAll(".account-panel").forEach((panel) => {
+        panel.classList.toggle("is-active", panel.dataset.panel === btn.dataset.tab);
+      });
+    });
+  });
+}
+
+async function refreshAll() {
+  const [products, orders] = await Promise.all([adminListProducts(), adminListOrders()]);
+  renderProductsTable(products);
+  renderOrdersTable(orders);
+  renderStats(products, orders);
+  renderCharts(orders);
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
-  renderAuthHeader();
+  wireTabs();
 
   const session = await getSession();
   if (!session) {
@@ -104,7 +227,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   document.getElementById("adminContent").hidden = false;
 
-  await Promise.all([loadProducts(), loadOrders()]);
+  await refreshAll();
 
   document.getElementById("newProductForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -119,6 +242,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       active: true,
     });
     e.target.reset();
-    await loadProducts();
+    await refreshAll();
   });
 });

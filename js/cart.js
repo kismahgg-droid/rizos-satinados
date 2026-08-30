@@ -55,9 +55,16 @@ function cartCount(cart) {
   return cart.reduce((sum, it) => sum + it.qty, 0);
 }
 
-function checkoutMessage(cart) {
-  const lines = cart.map((it) => `- ${it.qty} × ${it.name}${it.color ? " (" + it.color + ")" : ""}`);
-  return `Hola, quiero hacer este pedido:\n${lines.join("\n")}\nTotal aproximado: ${money(cartTotal(cart))}`;
+function itemsSummary(cart) {
+  return cart.map((it) => `${it.qty} × ${it.name}${it.color ? " (" + it.color + ")" : ""}`).join(", ");
+}
+
+function directCheckoutMessage(cart) {
+  return `Hola, compré ${itemsSummary(cart)}. Quiero coordinar la entrega. Total: ${money(cartTotal(cart))}`;
+}
+
+function prexCheckoutMessage(cart, transferCode) {
+  return `Hola, compré ${itemsSummary(cart)}, este es mi código de transferencia ${transferCode}.`;
 }
 
 function openDrawer() {
@@ -132,7 +139,28 @@ function renderCart() {
   });
 
   if (totalEl) totalEl.textContent = money(cartTotal(cart));
-  if (checkoutBtn) checkoutBtn.dataset.msg = checkoutMessage(cart);
+}
+
+// Panel de éxito post-compra: copia un mensaje prearmado y abre el DM de Instagram.
+function openSuccess(message) {
+  const modal = document.getElementById("successModal");
+  const backdrop = document.getElementById("successBackdrop");
+  const hint = document.getElementById("successHint");
+  if (!modal || !backdrop) {
+    window.location.href = INSTAGRAM_DM_URL;
+    return;
+  }
+  modal.dataset.msg = message;
+  if (hint) hint.hidden = true;
+  modal.classList.add("open");
+  backdrop.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeSuccess() {
+  document.getElementById("successModal")?.classList.remove("open");
+  document.getElementById("successBackdrop")?.classList.remove("open");
+  document.body.style.overflow = "";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -159,9 +187,32 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("No se pudo registrar el pedido", err);
       }
     }
+    const message = directCheckoutMessage(cart);
     saveCart([]);
     closeDrawer();
+    openSuccess(message);
   });
+
+  const successModal = document.getElementById("successModal");
+  const successBackdrop = document.getElementById("successBackdrop");
+  if (successModal && successBackdrop) {
+    document.getElementById("successClose")?.addEventListener("click", closeSuccess);
+    successBackdrop.addEventListener("click", closeSuccess);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeSuccess();
+    });
+    document.getElementById("coordinarEntregaBtn")?.addEventListener("click", async () => {
+      const message = successModal.dataset.msg || "Hola, quiero coordinar mi pedido.";
+      const hint = document.getElementById("successHint");
+      try {
+        await navigator.clipboard.writeText(message);
+        if (hint) hint.hidden = false;
+      } catch {
+        // Sin permiso de portapapeles: igual la dirigimos al DM.
+      }
+      window.open(INSTAGRAM_DM_URL, "_blank", "noopener");
+    });
+  }
 
   // Modal de pago con Prex
   const prexModal = document.getElementById("prexModal");
@@ -208,6 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const errorEl = document.getElementById("prexError");
       errorEl.hidden = true;
       const fd = new FormData(prexForm);
+      const transferCode = fd.get("transfer_code");
       try {
         await createPrexOrder({
           items: cart,
@@ -215,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
           guestEmail: fd.get("guest_email"),
           contactMethod: fd.get("contact_method"),
           contactValue: fd.get("contact_value"),
-          transferCode: fd.get("transfer_code"),
+          transferCode,
         });
       } catch (err) {
         console.error(err);
@@ -223,10 +275,11 @@ document.addEventListener("DOMContentLoaded", () => {
         errorEl.hidden = false;
         return;
       }
+      const message = prexCheckoutMessage(cart, transferCode);
       saveCart([]);
       closePrex();
       closeDrawer();
-      window.location.href = INSTAGRAM_DM_URL;
+      openSuccess(message);
     });
   }
 });

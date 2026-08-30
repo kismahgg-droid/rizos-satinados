@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mi cuenta — Rizos Satinados</title>
 <meta name="robots" content="noindex">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%233E1B4D'/%3E%3Ctext x='50' y='68' font-family='Georgia, serif' font-size='58' font-style='italic' fill='%23FBF3EF' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/jpeg" href="img/Logo.jpeg">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -13,7 +13,10 @@
 
 <header class="site-header">
   <div class="wrap header-inner">
-    <a href="index.html" class="logo">Rizos <span>Satinados</span></a>
+    <a href="index.html" class="logo">
+      <img src="img/Logo.jpeg" alt="Logo Rizos Satinados" class="logo-mark">
+      Rizos <span>Satinados</span>
+    </a>
     <nav class="main-nav" id="main-nav">
       <a href="index.html">Inicio</a>
       <a href="index.html#gorritos">Gorritos</a>
@@ -21,11 +24,7 @@
       <a href="index.html#beneficios">Beneficios</a>
       <a href="index.html#pedir">Cómo pedir</a>
       <a href="index.html#contacto">Contacto</a>
-      <a href="myaccount.html">Mi cuenta</a>
     </nav>
-    <div class="header-actions">
-      <a href="myaccount.html" id="authLink" class="btn btn-primary btn-small">Mi cuenta</a>
-    </div>
     <button type="button" class="cart-toggle" id="cartToggle" aria-label="Ver carrito">
       <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21 8H6"/></svg>
       <span class="cart-count" hidden>0</span>
@@ -108,7 +107,7 @@
   <div class="cart-items" id="cartItems"></div>
   <div class="cart-footer">
     <div class="cart-total-row"><span>Total</span><span id="cartTotal">$ 0</span></div>
-    <button type="button" class="btn btn-primary js-contact" id="cartCheckoutBtn" data-msg="" hidden>Finalizar por WhatsApp/Instagram</button>
+    <button type="button" class="btn btn-primary" id="cartCheckoutBtn" hidden>Finalizar pedido</button>
     <button type="button" class="btn btn-outline btn-prex" id="cartPrexBtn" hidden>Pagar con Prex</button>
   </div>
 </aside>
@@ -146,6 +145,23 @@
     <p class="auth-error" id="prexError" hidden></p>
     <button type="submit" class="btn btn-primary">Confirmar pago</button>
   </form>
+</div>
+
+<div class="prex-backdrop" id="successBackdrop"></div>
+<div class="prex-modal success-modal" id="successModal" role="dialog" aria-modal="true" aria-label="Coordinar entrega">
+  <button type="button" class="contact-menu-close" id="successClose" aria-label="Cerrar">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+  <span class="success-icon">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+  </span>
+  <p class="contact-menu-title">¡Gracias por tu compra!</p>
+  <p class="success-text">Para coordinar la entrega, escribinos por Instagram. Te copiamos un mensaje listo para pegar en el chat.</p>
+  <button type="button" class="btn btn-primary" id="coordinarEntregaBtn">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.97.24 2.43.41.55.2.99.46 1.42.9.44.43.7.87.9 1.42.17.46.36 1.26.41 2.43.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.24 1.97-.41 2.43-.2.55-.46.99-.9 1.42-.43.44-.87.7-1.42.9-.46.17-1.26.36-2.43.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.97-.24-2.43-.41a3.9 3.9 0 0 1-1.42-.9 3.9 3.9 0 0 1-.9-1.42c-.17-.46-.36-1.26-.41-2.43C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.24-1.97.41-2.43.2-.55.46-.99.9-1.42.43-.44.87-.7 1.42-.9.46-.17 1.26-.36 2.43-.41C8.42 2.21 8.8 2.2 12 2.2Zm0 1.98c-3.15 0-3.5.01-4.73.07-.96.04-1.48.2-1.83.34-.46.18-.79.39-1.13.73-.34.34-.55.67-.73 1.13-.14.35-.3.87-.34 1.83-.06 1.23-.07 1.58-.07 4.73s.01 3.5.07 4.73c.04.96.2 1.48.34 1.83.18.46.39.79.73 1.13.34.34.67.55 1.13.73.35.14.87.3 1.83.34 1.23.06 1.58.07 4.73.07s3.5-.01 4.73-.07c.96-.04 1.48-.2 1.83-.34.46-.18.79-.39 1.13-.73.34-.34.55-.67.73-1.13.14-.35.3-.87.34-1.83.06-1.23.07-1.58.07-4.73s-.01-3.5-.07-4.73c-.04-.96-.2-1.48-.34-1.83a3.03 3.03 0 0 0-.73-1.13 3.03 3.03 0 0 0-1.13-.73c-.35-.14-.87-.3-1.83-.34C15.5 4.19 15.15 4.18 12 4.18Zm0 3.37a4.45 4.45 0 1 1 0 8.9 4.45 4.45 0 0 1 0-8.9Zm0 1.98a2.47 2.47 0 1 0 0 4.94 2.47 2.47 0 0 0 0-4.94Zm4.66-2.2a1.04 1.04 0 1 1 0 2.08 1.04 1.04 0 0 1 0-2.08Z"/></svg>
+    Coordinar entrega
+  </button>
+  <p class="success-hint" id="successHint" hidden>Mensaje copiado ✓ Pegalo en el chat de Instagram.</p>
 </div>
 
 <script src="js/script.js"></script>

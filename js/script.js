@@ -1,16 +1,6 @@
-const WHATSAPP_NUMBER = "59892796323";
-const INSTAGRAM_DM_URL = "https://ig.me/m/rizos.satinados";
-
 document.addEventListener("DOMContentLoaded", () => {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
-
-  document.querySelectorAll(".js-whatsapp").forEach((link) => {
-    const msg = link.dataset.msg || "¡Hola! Quiero hacer una consulta ✨";
-    link.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-    link.setAttribute("target", "_blank");
-    link.setAttribute("rel", "noopener");
-  });
 
   const navToggle = document.getElementById("navToggle");
   const mainNav = document.getElementById("main-nav");
@@ -31,56 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const contactMenu = document.getElementById("contactMenu");
-  const contactBackdrop = document.getElementById("contactBackdrop");
-  const contactMenuClose = document.getElementById("contactMenuClose");
-  if (contactMenu && contactBackdrop) {
-    const waItem = document.getElementById("contactMenuWhatsapp");
-    const igItem = document.getElementById("contactMenuInstagram");
-    let activeTrigger = null;
-
-    const closeMenu = () => {
-      contactMenu.classList.remove("open");
-      contactBackdrop.classList.remove("open");
-      document.body.style.overflow = "";
-      if (activeTrigger) {
-        activeTrigger.setAttribute("aria-expanded", "false");
-        activeTrigger = null;
-      }
-    };
-
-    const openMenu = (trigger) => {
-      const msg = trigger.dataset.msg || "Hola, quiero hacer una consulta sobre sus productos.";
-      if (waItem) waItem.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-      if (igItem) igItem.href = INSTAGRAM_DM_URL;
-
-      activeTrigger = trigger;
-      trigger.setAttribute("aria-haspopup", "dialog");
-      trigger.setAttribute("aria-expanded", "true");
-      contactMenu.classList.add("open");
-      contactBackdrop.classList.add("open");
-      document.body.style.overflow = "hidden";
-    };
-
-    // Delegación de eventos: así también funciona con las tarjetas de producto
-    // que se agregan dinámicamente después de esta carga inicial.
-    document.addEventListener("click", (e) => {
-      const trigger = e.target.closest(".js-contact");
-      if (!trigger) return;
-      e.preventDefault();
-      openMenu(trigger);
-    });
-
-    [waItem, igItem].forEach((item) => {
-      if (item) item.addEventListener("click", closeMenu);
-    });
-    if (contactMenuClose) contactMenuClose.addEventListener("click", closeMenu);
-    contactBackdrop.addEventListener("click", closeMenu);
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeMenu();
-    });
-  }
-
   // Fundido suave al navegar entre páginas del sitio (en vez de un salto seco).
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   document.querySelectorAll('a[href$=".html"], a[href*=".html#"]').forEach((link) => {
@@ -90,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (link.pathname === window.location.pathname) {
         // Ancla dentro de la misma página (ej. "Beneficios"): dejar el scroll suave nativo.
         if (link.hash) return;
-        // Mismo link sin ancla estando ya en esa página (ej. "Mi cuenta"): no hacer nada.
+        // Mismo link sin ancla estando ya en esa página: no hacer nada.
         e.preventDefault();
         return;
       }
