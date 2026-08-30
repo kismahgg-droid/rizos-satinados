@@ -5,7 +5,6 @@ import {
   getFavorites,
   toggleFavorite,
   requestStockAlert,
-  createOrder,
   getVisibleTestimonials,
   money,
   renderAuthHeader,
@@ -27,32 +26,38 @@ function cardHTML(product, isFavorite) {
       ? `<p class="price">${money(product.price)}</p>`
       : `<p class="price price-tbd">Consultar precio</p>`;
 
-  const actionHTML = outOfStock
-    ? `<button type="button" class="card-link alert-btn" data-product-id="${product.id}">Avisarme cuando haya stock</button>`
-    : `<a href="#" class="card-link js-contact js-contact-product" data-product-id="${product.id}" data-price="${product.price}" data-msg="Hola, me interesa ${product.name}${product.color ? " color " + product.color : ""}.">Consultar &rarr;</a>`;
+  const stockLine = !hasRealStock
+    ? `<p class="stock-line stock-unknown">Consultar disponibilidad</p>`
+    : outOfStock
+    ? `<p class="stock-line stock-out">Sin stock</p>`
+    : `<p class="stock-line stock-in">${product.stock} disponible${product.stock === 1 ? "" : "s"}</p>`;
+
+  const favButtonHTML = `
+    <button type="button" class="fav-btn ${isFavorite ? "is-fav" : ""}" data-product-id="${product.id}" aria-label="Marcar como favorito">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="${isFavorite ? "currentColor" : "none"}" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-10-9.3C.5 7.8 2.3 4.5 5.7 4c2-.3 3.9.6 5 2.2C11.8 4.6 13.7 3.7 15.7 4c3.4.5 5.2 3.8 3.7 7.2-2.5 4.7-10 9.3-10 9.3Z"/></svg>
+    </button>`;
+
+  const secondaryActionHTML = outOfStock
+    ? `<button type="button" class="alert-btn" data-product-id="${product.id}">Avisarme cuando haya stock</button>`
+    : `<button type="button" class="cart-add-btn" data-product-id="${product.id}" aria-label="Agregar al carrito">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21 8H6"/></svg>
+        <span>Agregar</span>
+      </button>`;
 
   return `
     <figure class="product-card reveal in-view" data-product-id="${product.id}">
       <div class="product-img">
-        <div class="card-icon-stack">
-          <button type="button" class="fav-btn ${isFavorite ? "is-fav" : ""}" data-product-id="${product.id}" aria-label="Marcar como favorito">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="${isFavorite ? "currentColor" : "none"}" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-10-9.3C.5 7.8 2.3 4.5 5.7 4c2-.3 3.9.6 5 2.2C11.8 4.6 13.7 3.7 15.7 4c3.4.5 5.2 3.8 3.7 7.2-2.5 4.7-10 9.3-10 9.3Z"/></svg>
-          </button>
-          ${
-            outOfStock
-              ? ""
-              : `<button type="button" class="cart-add-btn" data-product-id="${product.id}" aria-label="Agregar al carrito">
-                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21 8H6"/></svg>
-                </button>`
-          }
-        </div>
         ${outOfStock ? '<span class="out-badge">Sin stock</span>' : ""}
         <img src="${product.image_path}" alt="${productAlt(product)}" loading="lazy">
       </div>
       <figcaption>
         <h3>${product.name}</h3>
         ${priceLine}
-        ${actionHTML}
+        ${stockLine}
+        <div class="card-actions-row">
+          ${favButtonHTML}
+          ${secondaryActionHTML}
+        </div>
       </figcaption>
     </figure>`;
 }
@@ -73,7 +78,6 @@ async function renderProducts() {
 
   wireFavButtons(session);
   wireAlertButtons(session);
-  wireConsultarOrders(session);
   wireCartButtons(products);
 }
 
@@ -103,19 +107,6 @@ function wireAlertButtons(session) {
       await requestStockAlert(session.user.id, btn.dataset.productId);
       btn.textContent = "Te vamos a avisar ✓";
       btn.disabled = true;
-    });
-  });
-}
-
-function wireConsultarOrders(session) {
-  if (!session) return;
-  document.querySelectorAll(".js-contact-product").forEach((link) => {
-    link.addEventListener("click", () => {
-      const productId = link.dataset.productId;
-      const price = Number(link.dataset.price) || 0;
-      createOrder(session.user.id, { product_id: productId, qty: 1, unit_price: price }).catch((err) =>
-        console.error("No se pudo registrar el pedido", err)
-      );
     });
   });
 }
