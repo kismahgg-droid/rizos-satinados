@@ -4,4 +4,4 @@ Disallow: /cuenta.html
 Disallow: /mi-cuenta.html
 Disallow: /admin.html
 
-Sitemap: https://kismahgg-droid.github.io/rizos-satinados/sitemap.xml
+Sitemap: https://rizossatinados.com/sitemap.xml
