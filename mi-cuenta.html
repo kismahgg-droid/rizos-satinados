@@ -23,6 +23,10 @@
     <div class="header-actions">
       <a href="mi-cuenta.html" id="authLink" class="btn btn-primary btn-small">Mi cuenta</a>
     </div>
+    <button type="button" class="cart-toggle" id="cartToggle" aria-label="Ver carrito">
+      <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21 8H6"/></svg>
+      <span class="cart-count" hidden>0</span>
+    </button>
     <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="main-nav">
       <span></span><span></span><span></span>
     </button>
@@ -70,7 +74,23 @@
   </div>
 </footer>
 
+<div class="cart-backdrop" id="cartBackdrop"></div>
+<aside class="cart-drawer" id="cartDrawer" aria-label="Carrito de compras">
+  <div class="cart-drawer-head">
+    <h2>Tu carrito</h2>
+    <button type="button" class="cart-close" id="cartClose" aria-label="Cerrar carrito">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer">
+    <div class="cart-total-row"><span>Total</span><span id="cartTotal">$ 0</span></div>
+    <button type="button" class="btn btn-primary js-contact" id="cartCheckoutBtn" data-msg="" hidden>Finalizar por WhatsApp/Instagram</button>
+  </div>
+</aside>
+
 <script src="js/script.js"></script>
 <script type="module" src="js/my-account.js"></script>
+<script type="module" src="js/cart.js"></script>
 </body>
 </html>

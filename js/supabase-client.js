@@ -28,6 +28,13 @@ export async function signOut() {
   return supabase.auth.signOut();
 }
 
+export async function signInWithProvider(provider) {
+  return supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: new URL("mi-cuenta.html", window.location.href).toString() },
+  });
+}
+
 export async function getActiveProducts() {
   const { data, error } = await supabase
     .from("products")
@@ -73,6 +80,24 @@ export async function createOrder(userId, item) {
     qty: item.qty,
     unit_price: item.unit_price,
   });
+  return order;
+}
+
+export async function createOrderWithItems(userId, items) {
+  const total = items.reduce((sum, it) => sum + it.unit_price * it.qty, 0);
+  const { data: order, error } = await supabase
+    .from("orders")
+    .insert({ customer_id: userId, total })
+    .select()
+    .single();
+  if (error) throw error;
+  const rows = items.map((it) => ({
+    order_id: order.id,
+    product_id: it.product_id,
+    qty: it.qty,
+    unit_price: it.unit_price,
+  }));
+  await supabase.from("order_items").insert(rows);
   return order;
 }
 

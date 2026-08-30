@@ -1,4 +1,4 @@
-import { signIn, signUp, getSession, renderAuthHeader } from "./supabase-client.js";
+import { signIn, signUp, signInWithProvider, getSession, renderAuthHeader } from "./supabase-client.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   renderAuthHeader();
@@ -8,6 +8,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "mi-cuenta.html";
     return;
   }
+
+  document.querySelectorAll(".btn-social").forEach((btn) => {
+    btn.addEventListener("click", () => signInWithProvider(btn.dataset.provider));
+  });
 
   const tabs = document.querySelectorAll(".auth-tab");
   const loginForm = document.getElementById("loginForm");
