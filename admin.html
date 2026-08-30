@@ -72,10 +72,6 @@
                 <h3>Pedidos por estado</h3>
                 <div class="bar-list" id="statusChart"></div>
               </div>
-              <div class="chart-card">
-                <h3>Métodos de pago</h3>
-                <div class="bar-list" id="paymentChart"></div>
-              </div>
             </div>
           </div>
 
@@ -114,14 +110,8 @@
           <div class="account-panel" data-panel="pedidos">
             <div class="admin-block">
               <h2>Pedidos</h2>
-              <div class="admin-table-wrap">
-                <table class="admin-table" id="ordersTable">
-                  <thead>
-                    <tr><th>Fecha</th><th>Clienta</th><th>Contacto</th><th>Productos</th><th>Total</th><th>Pago</th><th>Código</th><th>Estado</th></tr>
-                  </thead>
-                  <tbody id="ordersTableBody"></tbody>
-                </table>
-              </div>
+              <div class="orders-toolbar" id="ordersFilter"></div>
+              <div class="orders-list" id="ordersList"></div>
             </div>
           </div>
         </div>

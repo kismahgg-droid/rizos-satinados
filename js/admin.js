@@ -12,9 +12,11 @@ import {
 
 const STATUSES = ["pendiente", "confirmado", "entregado", "cancelado"];
 const STATUS_LABELS = { pendiente: "Pendiente", confirmado: "Confirmado", entregado: "Entregado", cancelado: "Cancelado" };
-const STATUS_COLORS = { pendiente: "#5C2A72", confirmado: "#2fa360", entregado: "#1a7f4b", cancelado: "#B3261E" };
+const STATUS_COLORS = { pendiente: "#E3A008", confirmado: "#2563EB", entregado: "#1A7F4B", cancelado: "#B3261E" };
 const PAYMENT_LABELS = { efectivo: "Efectivo", transferencia: "Transferencia", prex: "Prex" };
-const PAYMENT_COLORS = { efectivo: "#2a78d6", transferencia: "#eb6834", prex: "#1baf7a" };
+
+let allOrders = [];
+let currentOrderFilter = "todos";
 
 function productRow(p) {
   return `
@@ -30,7 +32,7 @@ function productRow(p) {
     </tr>`;
 }
 
-function orderRow(o) {
+function orderCard(o) {
   const items = (o.order_items || []).map((it) => `${it.qty} × ${it.products?.name || "Producto"}`).join(", ");
   const options = STATUSES.map(
     (s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${STATUS_LABELS[s]}</option>`
@@ -43,17 +45,23 @@ function orderRow(o) {
     contactBits.push(`${o.contact_method === "instagram" ? "IG" : "Tel"}: ${o.contact_value}`);
   }
   const payment = o.payment_method ? PAYMENT_LABELS[o.payment_method] || o.payment_method : "—";
+  const date = new Date(o.created_at).toLocaleDateString("es-UY", { day: "2-digit", month: "2-digit", year: "numeric" });
   return `
-    <tr data-id="${o.id}">
-      <td>${new Date(o.created_at).toLocaleDateString("es-UY")}</td>
-      <td>${clientName}${!o.profiles ? " (invitada)" : ""}</td>
-      <td>${contactBits.join(" · ") || "—"}</td>
-      <td>${items}</td>
-      <td>${money(o.total)}</td>
-      <td>${payment}</td>
-      <td>${o.transfer_code || "—"}</td>
-      <td><select class="admin-input status-select">${options}</select></td>
-    </tr>`;
+    <div class="order-card" data-id="${o.id}">
+      <div class="order-card-top">
+        <div class="order-card-top-left">
+          <select class="order-status-select status-${o.status}">${options}</select>
+          <span class="order-card-date">${date}</span>
+        </div>
+        <span class="order-card-total">${money(o.total)}</span>
+      </div>
+      <p class="order-card-client"><strong>${clientName}</strong>${!o.profiles ? '<span class="order-guest-tag">Invitada</span>' : ""}</p>
+      <p class="order-card-contact">${contactBits.join(" · ") || "Sin datos de contacto"}</p>
+      <p class="order-card-items">${items}</p>
+      <div class="order-card-foot">
+        <span class="order-card-payment"><strong>${payment}</strong>${o.transfer_code ? " · Código: " + o.transfer_code : ""}</span>
+      </div>
+    </div>`;
 }
 
 function renderProductsTable(products) {
@@ -109,13 +117,46 @@ function renderProductsTable(products) {
   });
 }
 
-function renderOrdersTable(orders) {
-  const tbody = document.getElementById("ordersTableBody");
-  tbody.innerHTML = orders.map(orderRow).join("");
+function orderCountByStatus(orders, status) {
+  return status === "todos" ? orders.length : orders.filter((o) => o.status === status).length;
+}
 
-  tbody.querySelectorAll("tr").forEach((row) => {
-    const id = row.dataset.id;
-    const select = row.querySelector(".status-select");
+function renderOrdersToolbar() {
+  const el = document.getElementById("ordersFilter");
+  if (!el) return;
+  const filters = ["todos", ...STATUSES];
+  el.innerHTML = filters
+    .map((f) => {
+      const label = f === "todos" ? "Todos" : STATUS_LABELS[f];
+      const count = orderCountByStatus(allOrders, f);
+      return `<button type="button" class="orders-filter-btn ${f === currentOrderFilter ? "is-active" : ""}" data-filter="${f}">${label} <span class="count">${count}</span></button>`;
+    })
+    .join("");
+  el.querySelectorAll(".orders-filter-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentOrderFilter = btn.dataset.filter;
+      renderOrdersToolbar();
+      renderOrdersList();
+    });
+  });
+}
+
+function renderOrdersList() {
+  const el = document.getElementById("ordersList");
+  if (!el) return;
+  const filtered =
+    currentOrderFilter === "todos" ? allOrders : allOrders.filter((o) => o.status === currentOrderFilter);
+
+  if (!filtered.length) {
+    el.innerHTML = '<p class="account-empty">No hay pedidos en esta categoría.</p>';
+    return;
+  }
+
+  el.innerHTML = filtered.map(orderCard).join("");
+
+  el.querySelectorAll(".order-card").forEach((card) => {
+    const id = card.dataset.id;
+    const select = card.querySelector(".order-status-select");
     select.dataset.previousValue = select.value;
     select.addEventListener("change", async () => {
       const previousValue = select.dataset.previousValue;
@@ -128,10 +169,15 @@ function renderOrdersTable(orders) {
         select.value = previousValue;
         return;
       }
-      select.dataset.previousValue = select.value;
       await refreshAll();
     });
   });
+}
+
+function renderOrders(orders) {
+  allOrders = orders;
+  renderOrdersToolbar();
+  renderOrdersList();
 }
 
 // --- Estadísticas ---
@@ -219,18 +265,10 @@ function statusDistribution(orders) {
   });
 }
 
-function paymentDistribution(orders) {
-  return Object.keys(PAYMENT_LABELS).map((m) => {
-    const value = orders.filter((o) => o.payment_method === m).length;
-    return { label: PAYMENT_LABELS[m], value, display: String(value), color: PAYMENT_COLORS[m] };
-  });
-}
-
 function renderCharts(orders) {
   renderBarList("salesChart", salesByDay(orders));
   renderBarList("topProductsChart", topProductsData(orders));
   renderBarList("statusChart", statusDistribution(orders));
-  renderBarList("paymentChart", paymentDistribution(orders));
 }
 
 function wireTabs() {
@@ -250,7 +288,7 @@ function wireTabs() {
 async function refreshAll() {
   const [products, orders] = await Promise.all([adminListProducts(), adminListOrders()]);
   renderProductsTable(products);
-  renderOrdersTable(orders);
+  renderOrders(orders);
   renderStats(products, orders);
   renderCharts(orders);
 }
