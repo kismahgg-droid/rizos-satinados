@@ -1,4 +1,4 @@
-import { getSession, createOrderWithItems, createPrexOrder, money } from "./supabase-client.js";
+import { createPrexOrder, money } from "./supabase-client.js";
 
 const CART_KEY = "rs_cart";
 const INSTAGRAM_DM_URL = "https://ig.me/m/rizos.satinados";
@@ -59,10 +59,6 @@ function itemsSummary(cart) {
   return cart.map((it) => `${it.qty} × ${it.name}${it.color ? " (" + it.color + ")" : ""}`).join(", ");
 }
 
-function directCheckoutMessage(cart) {
-  return `Hola, compré ${itemsSummary(cart)}. Quiero coordinar la entrega. Total: ${money(cartTotal(cart))}`;
-}
-
 function prexCheckoutMessage(cart, transferCode) {
   return `Hola, compré ${itemsSummary(cart)}, este es mi código de transferencia ${transferCode}.`;
 }
@@ -88,20 +84,16 @@ function renderCart() {
 
   const itemsEl = document.getElementById("cartItems");
   const totalEl = document.getElementById("cartTotal");
-  const checkoutBtn = document.getElementById("cartCheckoutBtn");
+  const prexBtn = document.getElementById("cartPrexBtn");
   if (!itemsEl) return;
 
   if (!cart.length) {
     itemsEl.innerHTML = '<p class="account-empty">Todavía no agregaste productos.</p>';
     if (totalEl) totalEl.textContent = money(0);
-    if (checkoutBtn) checkoutBtn.hidden = true;
-    const prexBtn = document.getElementById("cartPrexBtn");
     if (prexBtn) prexBtn.hidden = true;
     return;
   }
 
-  const prexBtn = document.getElementById("cartPrexBtn");
-  if (checkoutBtn) checkoutBtn.hidden = false;
   if (prexBtn) prexBtn.hidden = false;
   itemsEl.innerHTML = cart
     .map(
@@ -141,15 +133,25 @@ function renderCart() {
   if (totalEl) totalEl.textContent = money(cartTotal(cart));
 }
 
-// Panel de éxito post-compra: copia un mensaje prearmado y abre el DM de Instagram.
+// Copia un mensaje prearmado y abre el DM de Instagram en una pestaña nueva.
+async function goToInstagram(message) {
+  const hint = document.getElementById("successHint");
+  try {
+    await navigator.clipboard.writeText(message);
+    if (hint) hint.hidden = false;
+  } catch {
+    // Sin permiso de portapapeles: igual la dirigimos al DM.
+  }
+  window.open(INSTAGRAM_DM_URL, "_blank", "noopener");
+}
+
+// Panel de éxito post-pago: confirma el pago y sirve de respaldo por si el
+// navegador bloqueó la apertura automática de Instagram (pop-up blocker).
 function openSuccess(message) {
   const modal = document.getElementById("successModal");
   const backdrop = document.getElementById("successBackdrop");
   const hint = document.getElementById("successHint");
-  if (!modal || !backdrop) {
-    window.location.href = INSTAGRAM_DM_URL;
-    return;
-  }
+  if (!modal || !backdrop) return;
   modal.dataset.msg = message;
   if (hint) hint.hidden = true;
   modal.classList.add("open");
@@ -173,26 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") closeDrawer();
   });
 
-  document.getElementById("cartCheckoutBtn")?.addEventListener("click", async () => {
-    const cart = getCart();
-    if (!cart.length) return;
-    const session = await getSession();
-    if (session) {
-      try {
-        await createOrderWithItems(
-          session.user.id,
-          cart.map((it) => ({ product_id: it.product_id, qty: it.qty, unit_price: it.price }))
-        );
-      } catch (err) {
-        console.error("No se pudo registrar el pedido", err);
-      }
-    }
-    const message = directCheckoutMessage(cart);
-    saveCart([]);
-    closeDrawer();
-    openSuccess(message);
-  });
-
   const successModal = document.getElementById("successModal");
   const successBackdrop = document.getElementById("successBackdrop");
   if (successModal && successBackdrop) {
@@ -201,16 +183,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") closeSuccess();
     });
-    document.getElementById("coordinarEntregaBtn")?.addEventListener("click", async () => {
-      const message = successModal.dataset.msg || "Hola, quiero coordinar mi pedido.";
-      const hint = document.getElementById("successHint");
-      try {
-        await navigator.clipboard.writeText(message);
-        if (hint) hint.hidden = false;
-      } catch {
-        // Sin permiso de portapapeles: igual la dirigimos al DM.
-      }
-      window.open(INSTAGRAM_DM_URL, "_blank", "noopener");
+    document.getElementById("coordinarEntregaBtn")?.addEventListener("click", () => {
+      goToInstagram(successModal.dataset.msg || "Hola, quiero coordinar mi pedido.");
     });
   }
 
@@ -244,7 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const contactInput = prexForm.contact_value;
     prexForm.querySelectorAll('input[name="contact_method"]').forEach((radio) => {
       radio.addEventListener("change", () => {
-        const isPhone = radio.value === "telefono" && radio.checked;
         if (radio.checked) {
           contactLabel.firstChild.textContent = radio.value === "telefono" ? "Tu teléfono " : "Tu Instagram ";
           contactInput.placeholder = radio.value === "telefono" ? "09X XXX XXX" : "@tu.usuario";
@@ -279,7 +252,11 @@ document.addEventListener("DOMContentLoaded", () => {
       saveCart([]);
       closePrex();
       closeDrawer();
+      // Apenas se confirma el pago, la derivamos a Instagram automáticamente.
+      // El panel de éxito queda de respaldo por si el navegador bloqueó la
+      // apertura de la pestaña nueva.
       openSuccess(message);
+      goToInstagram(message);
     });
   }
 });
